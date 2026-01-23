@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Data Hub - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-body: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --color-1: #8cd6d1;
+            --color-2: #f7c97e;
+            --color-3: #f9a697;
+            --color-4: #a7a6e0;
+            --color-5: #a0d68c;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            border-top: 5px solid #ffcc00;
+            /* Preview Indicator */
+        }
+
+        /* 共通チャートコンテナ */
+        .chart-section {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 4rem auto;
+            position: relative;
+            /* オーバーレイの基準 */
+        }
+
+        /* Word Cloud エリア */
+        .word-cloud-container {
+            height: 400px;
+            /* デフォルト */
+            background-color: #fbfbfb;
+            border-radius: 16px;
+            /* border: 1px solid #f0f0f0; */
+            position: relative;
+        }
+
+        /* トレンドチャート エリア */
+        .line-chart-container {
+            height: 400px;
+        }
+
+        /* オーバーレイ (Word Cloud内に表示) */
+        #wcOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            display: none;
+            /* 初期非表示 */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .section-title {
+            font-weight: 900;
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .section-note {
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: normal;
+        }
+
+        /* HEADER */
+        header {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* PICKUPエリア */
+        .pickup-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .pickup-tag {
+            padding: 4px 12px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #666;
+        }
+
+        /* ローディング */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Preview Badge */
+        .preview-badge {
+            background-color: #ffcc00;
+            color: #000;
+            font-weight: bold;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body class="p-6 md:p-12">
+
+    <!-- LOADING -->
+    <div id="loading">
+        <div class="text-sm font-bold text-gray-400">LOADING PREVIEW...</div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- HEADER -->
+        <header class="mb-10 pb-6 text-center">
+            <h1 class="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-2">
+                YouTube Data Hub <span class="preview-badge">PREVIEW</span>
+            </h1>
+            <p class="text-xs font-bold text-gray-400 tracking-[0.2em] uppercase">Visualizing Public Opinion (Draft)</p>
+            <div class="mt-4 text-[10px] text-gray-400 font-mono">
+                LAST UPDATED: <span id="lastUpdated">--/-- --:--</span>
+            </div>
+        </header>
+
+        <!-- PICKUP TOPICS (Moved to Top) -->
+        <div class="mb-12">
+            <div class="text-center mb-2 text-xs font-bold text-gray-400">PICKUP TOPICS</div>
+            <div id="pickupArea" class="pickup-box"></div>
+        </div>
+
+        <!-- SECTION 1: WORD CLOUD -->
+        <section class="chart-section">
+            <h2 class="section-title">
+                政策別 注目度ワードクラウド
+                <span class="section-note">集計: <span id="wcDateLabel">--月--日分</span></span>
+            </h2>
+
+            <div class="word-cloud-container">
+                <canvas id="wordCloudChart"></canvas>
+
+                <!-- Drilldown Overlay (Inside Container) -->
+                <div id="wcOverlay">
+                    <button onclick="closeOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <!-- Center Details -->
+                    <div class="relative w-[300px] h-[300px]">
+                        <!-- 垂直中央配置の修正: flexで明示的に中央揃え -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                            <span id="overlayCenterText" class="text-xl font-bold text-gray-700"></span>
+                        </div>
+                        <canvas id="drilldownChart" class="relative z-10"></canvas>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-[10px] text-gray-400 mt-2">※キーワードをクリックすると詳細内訳を表示します</p>
+        </section>
+
+        <!-- SECTION 2: TREND CHART -->
+        <section class="chart-section">
+            <h2 class="section-title">
+                政策別 注目度の推移
+                <span class="section-note">期間: <span id="trendDateLabel">--/-- 〜 --/--</span></span>
+            </h2>
+            <div class="line-chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const DATA_SOURCE = './data_preview.json'; // PREVIEW SOURCE
+        const PALETTE = ['#8cd6d1', '#f7c97e', '#f9a697', '#a7a6e0', '#a0d68c', '#e0a6c7', '#8cc0d6'];
+
+        let appData = null;
+        let wcChart = null;
+        let lineChart = null;
+        let pieChart = null;
+
+        async function init() {
+            try {
+                const res = await fetch(DATA_SOURCE + '?t=' + new Date().getTime()); // Disable cache
+                if (!res.ok) throw new Error('Data load failed');
+                appData = await res.json();
+
+                // Meta Info
+                const meta = appData.meta || {};
+                document.getElementById('loading').style.display = 'none';
+
+                if (meta.lastUpdated) {
+                    const d = new Date(meta.lastUpdated);
+                    document.getElementById('lastUpdated').innerText = d.toLocaleString('ja-JP');
+                }
+                if (meta.targetDateLabel) document.getElementById('wcDateLabel').innerText = meta.targetDateLabel;
+                if (meta.rangeLabel) document.getElementById('trendDateLabel').innerText = meta.rangeLabel;
+
+                renderPickups();
+                renderWordCloud();
+                renderTrendChart();
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading').innerHTML = '<div class="text-red-500 font-bold">DATA LOAD ERROR<br>Please check data_preview.json</div>';
+            }
+        }
+
+        // --- 1. PICKUP TOPICS ---
+        function renderPickups() {
+            if (!appData.wordCloud) return;
+            const topItems = [...appData.wordCloud].sort((a, b) => b.score - a.score).slice(0, 6);
+            document.getElementById('pickupArea').innerHTML = topItems.map(item =>
+                `<span class="pickup-tag">${item.text}</span>`
+            ).join('');
+        }
+
+        // --- 2. WORD CLOUD ---
+        function renderWordCloud() {
+            const ctx = document.getElementById('wordCloudChart').getContext('2d');
+            const data = appData.wordCloud || [];
+
+            wcChart = new Chart(ctx, {
+                type: 'wordCloud',
+                data: {
+                    labels: data.map(d => d.text),
+                    datasets: [{
+                        data: data.map(d => 15 + d.score * 0.8), // Size calculation
+                        color: (ctx) => {
+                            const d = data[ctx.dataIndex];
+                            if (!d) return '#ccc';
+                            // モノクロ濃淡: 100->#333, 0->#bbb
+                            const val = Math.floor(187 - (187 - 51) * (d.score / 100)); // 187(#bb) ~ 51(#33)
+                            return `rgb(${val},${val},${val})`;
+                        }
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    elements: {
+                        word: {
+                            rotate: 0, // 完全横書き固定
+                            padding: 15,
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: '900',
+
+                            // ホバー時のエフェクト (chartjs-chart-wordcloudの仕様依存だが、colorなどが効く場合あり)
+                            hoverColor: '#8cd6d1',
+                            hoverSize: 5 // 拡大効果
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    onClick: (e, items) => {
+                        if (items.length > 0) {
+                            const idx = items[0].index;
+                            const text = wcChart.data.labels[idx];
+                            openOverlay(text);
+                        }
+                    },
+                    onHover: (e, items) => {
+                        // カーソル変更
+                        e.native.target.style.cursor = items.length > 0 ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+
+        // --- 3. OVERLAY & PIE CHART ---
+        function openOverlay(category) {
+            const overlay = document.getElementById('wcOverlay');
+            overlay.style.display = 'flex';
+
+            document.getElementById('overlayCenterText').innerText = category;
+
+            if (!appData.pie || !appData.pie[category]) return;
+
+            const pData = appData.pie[category]; // [{label, percent}, ...]
+            const ctx = document.getElementById('drilldownChart').getContext('2d');
+
+            if (pieChart) pieChart.destroy();
+
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: pData.map(d => d.label),
+                    datasets: [{
+                        data: pData.map(d => d.percent),
+                        backgroundColor: PALETTE,
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false }, // シンプル化
+                        tooltip: {
+                            callbacks: { label: (c) => ` ${c.label}: ${c.raw}%` }
+                        }
+                    },
+                    animation: { animateScale: true, animateRotate: true }
+                }
+            });
+        }
+
+        function closeOverlay() {
+            document.getElementById('wcOverlay').style.display = 'none';
+        }
+
+        // --- 4. TREND CHART ---
+        function renderTrendChart() {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            const trends = appData.trends || [];
+            if (trends.length === 0) return;
+
+            const dates = trends.map(d => d.date);
+            // キーからdateを除外してカテゴリリスト作成
+            const cats = Object.keys(trends[0]).filter(k => k !== 'date');
+
+            const datasets = cats.map((cat, i) => ({
+                label: cat,
+                data: trends.map(d => d[cat]),
+                borderColor: PALETTE[i % PALETTE.length],
+                backgroundColor: PALETTE[i % PALETTE.length],
+                borderWidth: 2.5,
+                pointRadius: 0, // 通常時は点なし
+                pointHoverRadius: 6,
+                tension: 0.1, // 少し滑らかに
+                fill: false
+            }));
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates, datasets: datasets },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom', // 下部中央
+                            align: 'center',
+                            labels: {
+                                boxWidth: 10, usePointStyle: true, padding: 20,
+                                font: { size: 11, family: 'Noto Sans JP' }, color: '#666'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index', intersect: false,
+                            callbacks: { label: (c) => ` ${c.dataset.label}` } // 値なし
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: true, color: '#f5f5f5' },
+                            ticks: { maxTicksLimit: 8, color: '#aaa', font: { size: 10 } }
+                        },
+                        y: { display: false } // Y軸非表示
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        }
+
+        window.closeOverlay = closeOverlay;
+        init();
+    </script>
+</body>
+
+</html>
