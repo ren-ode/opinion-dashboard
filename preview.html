@@ -240,14 +240,19 @@
                 const meta = appData.meta || {};
                 document.getElementById('loading').style.display = 'none';
 
+                let lastUpdatedDate = null;
                 if (meta.lastUpdated) {
-                    const d = new Date(meta.lastUpdated);
-                    document.getElementById('lastUpdated').innerText = d.toLocaleString('ja-JP');
+                    lastUpdatedDate = new Date(meta.lastUpdated);
+                    document.getElementById('lastUpdated').innerText = lastUpdatedDate.toLocaleString('ja-JP');
                 }
+
                 if (meta.targetDateLabel) {
                     document.getElementById('wcDateLabel').textContent = meta.targetDateLabel;
+                } else if (lastUpdatedDate) {
+                    // Fallback
+                    document.getElementById('wcDateLabel').textContent = `${lastUpdatedDate.getMonth() + 1}月${lastUpdatedDate.getDate()}日分 (推定)`;
                 } else {
-                    document.getElementById('wcDateLabel').textContent = '日付不明';
+                    document.getElementById('wcDateLabel').textContent = '(日付データなし)';
                 }
 
                 if (meta.rangeLabel) {
@@ -283,7 +288,7 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-                        data: data.map(d => 10 + (d.score * 0.5)), // Font size adjustment
+                        data: data.map(d => 10 + (d.score * 0.5)),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
@@ -356,11 +361,17 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    cutout: '60%',
+                    layout: {
+                        padding: 20 // 欠け防止パディング
+                    },
+                    cutout: '55%',
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            callbacks: { label: (c) => ` ${c.label}: ${c.raw}%` }
+                            // 詳細ワード重複の修正: ラベル + % のみを表示
+                            callbacks: {
+                                label: (c) => ` ${c.label}: ${c.raw}%`
+                            }
                         }
                     },
                     animation: { animateScale: true, animateRotate: true }
