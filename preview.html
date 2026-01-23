@@ -295,14 +295,13 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的フォントサイズ計算（はみ出し防止のための調整版）
+                            // 画面幅に応じた動的フォントサイズ計算（微調整版：確実に入るように）
                             const isSmallScreen = window.innerWidth < 600;
-                            const baseSize = isSmallScreen ? 12 : 16;
-                            // 文字数が多いと溢れるため、倍率と上限を抑制
-                            const multiplier = isSmallScreen ? 0.4 : 0.8;
+                            const baseSize = isSmallScreen ? 11 : 14;
+                            const multiplier = isSmallScreen ? 0.3 : 0.6;
                             const size = baseSize + (d.score * multiplier);
-                            // 上限キャップ (スマホ: 35px, PC: 70px)
-                            const maxSize = isSmallScreen ? 35 : 70;
+                            // 上限キャップ (スマホ: 28px, PC: 55px)
+                            const maxSize = isSmallScreen ? 28 : 55;
                             return Math.min(size, maxSize);
                         }),
                         color: (ctx) => {
@@ -316,7 +315,7 @@
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    layout: { padding: 10 }, // パディング少し戻す (はみ出し防止)
+                    layout: { padding: 15 }, // パディングを少し広げて安全圏確保
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
