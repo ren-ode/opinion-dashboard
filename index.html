@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>世論可視化ダッシュボード - Static</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Word Cloud -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4"></script>
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-body: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --grid-line: #f0f0f0;
+            
+            /* パステルカラーパレット */
+            --color-1: #8cd6d1; /* 水色系 */
+            --color-2: #f7c97e; /* 黄色系 */
+            --color-3: #f9a697; /* ピンク系 */
+            --color-4: #a7a6e0; /* 紫系 */
+            --color-5: #a0d68c; /* 緑系 */
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .line-chart-container {
+            position: relative;
+            height: 480px;
+            width: 100%;
+        }
+
+        /* オーバーレイ (ポップアップ) */
+        #chartOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .overlay-content {
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            padding: 2rem;
+            background: #fff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* タイムスタンプ装飾 */
+        .timestamp-box {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 700;
+            background: #f5f5f5;
+            padding: 4px 12px;
+            border-radius: 99px;
+            display: inline-block;
+        }
+        
+        .section-title {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: #333;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid #eee;
+            display: inline-block;
+            padding-bottom: 2px;
+        }
+
+        .loading-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-7xl mx-auto">
+        
+        <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight text-gray-800 mb-2">世論・トレンド可視化</h1>
+                <p class="text-sm font-bold text-gray-400">YOUTUBE RESEARCH DASHBOARD</p>
+            </div>
+            
+            <div class="flex flex-col items-end gap-2">
+                <div class="timestamp-box">
+                    集計期間：<span id="dataRangeLabel">----/--/-- ~ ----/--/--</span>
+                </div>
+                <div class="text-[10px] text-gray-400 font-bold">
+                    最終更新：<span id="lastUpdatedLabel">--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="loading" class="fixed inset-0 z-[200] flex items-center justify-center bg-white">
+            <div class="text-center">
+                <div class="mb-4">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+                <p class="text-xs font-bold text-gray-400 tracking-widest">LOADING DATA...</p>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="hidden fixed top-10 left-1/2 transform -translate-x-1/2 bg-red-100 text-red-700 px-6 py-4 rounded-lg shadow-lg border border-red-200 z-[200]">
+            <p class="font-bold">データ読み込みエラー</p>
+            <p class="text-sm mt-1">data.json が見つかりません。GitHubへのデータ出力が完了しているか確認してください。</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+            <div class="bg-white">
+                <div class="mb-6">
+                    <h2 class="section-title">注目トピック</h2>
+                    <p class="text-xs text-gray-400 font-bold mt-1">※クリックで詳細内訳を表示</p>
+                </div>
+                <div class="chart-container flex items-center justify-center bg-gray-50/50 rounded-xl border border-gray-100 p-4">
+                    <canvas id="wordCloudChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white flex flex-col justify-center">
+                <div class="p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center">
+                    <h3 class="font-bold text-gray-400 mb-4 text-sm">PICKUP TOPICS</h3>
+                    <div id="pickupKeywords" class="flex flex-wrap gap-2 justify-center">
+                        <!-- JSで動的に追加 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-12">
+            <h2 class="section-title mb-8">関心度の推移</h2>
+            <div class="line-chart-container bg-white">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+        <div id="chartOverlay">
+            <div class="overlay-content">
+                <button onclick="closeOverlay()" class="absolute top-6 right-6 text-gray-300 hover:text-gray-600 transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="text-center mb-8">
+                    <h3 id="overlayTitle" class="text-2xl font-black text-gray-800"></h3>
+                    <div class="w-12 h-1 bg-gray-200 mx-auto mt-4 rounded-full"></div>
+                </div>
+                <div class="h-[350px] w-full relative">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span id="centerText" class="text-xl font-bold text-gray-400"></span>
+                    </div>
+                    <canvas id="drilldownChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PALETTE = ['#8cd6d1', '#f7c97e', '#f9a697', '#a7a6e0', '#a0d68c', '#e0a6c7', '#8cc0d6'];
+        
+        // データソース (同じディレクトリのJSON)
+        const DATA_SOURCE = './data.json';
+
+        let appData = null; // { wordCloud: [], pie: {}, trends: [] }
+        let wordCloudChart = null;
+        let lineChart = null;
+        let drilldownChart = null;
+
+        async function init() {
+            try {
+                // Fetch Data
+                const res = await fetch(DATA_SOURCE);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                appData = await res.json();
+                
+                document.getElementById('loading').classList.add('hidden');
+                
+                // Update Timestamps
+                const updated = new Date(appData.lastUpdated);
+                document.getElementById('lastUpdatedLabel').innerText = 
+                    updated.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                // Date Range from Trends
+                if (appData.trends && appData.trends.length > 0) {
+                    const start = appData.trends[0].date;
+                    const end = appData.trends[appData.trends.length - 1].date;
+                    document.getElementById('dataRangeLabel').innerText = `${start.replace(/-/g,'/')} - ${end.replace(/-/g,'/')}`;
+                }
+
+                renderWordCloud();
+                renderLineChart();
+                renderPickups();
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
+            }
+        }
+
+        // --- Charts ---
+
+        function renderWordCloud() {
+            if (!appData.wordCloud || appData.wordCloud.length === 0) return;
+            
+            const ctx = document.getElementById('wordCloudChart').getContext('2d');
+            const data = appData.wordCloud; // [{text, score}, ...]
+
+            wordCloudChart = new Chart(ctx, {
+                type: 'wordCloud',
+                data: {
+                    labels: data.map(d => d.text),
+                    datasets: [{
+                        data: data.map(d => 10 + d.score * 0.8), // スコア(1-100)をフォントサイズに変換
+                        color: (context) => {
+                            // 相対スコアに基づくグレー濃淡
+                            const d = data[context.dataIndex];
+                            if(!d) return '#999';
+                            // score 100 -> dark (#333), score 1 -> light (#ccc)
+                            const intensity = Math.floor(204 - (204 - 51) * (d.score / 100));
+                            return `rgb(${intensity}, ${intensity}, ${intensity})`;
+                        }
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    elements: {
+                        word: {
+                            rotate: 0,
+                            padding: 10,
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: '900'
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false } // 数値完全非表示
+                    },
+                    onClick: (e, items) => {
+                        if (items.length > 0) {
+                            const label = wordCloudChart.data.labels[items[0].index];
+                            openOverlay(label);
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPickups() {
+            if (!appData.wordCloud) return;
+            // スコア高い順 Top 5
+            const top5 = [...appData.wordCloud].sort((a,b) => b.score - a.score).slice(0, 5);
+            const container = document.getElementById('pickupKeywords');
+            container.innerHTML = top5.map(item => 
+                `<span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-bold text-gray-500 shadow-sm">${item.text}</span>`
+            ).join('');
+        }
+
+        function renderLineChart() {
+            if (!appData.trends || appData.trends.length === 0) return;
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            
+            const dates = appData.trends.map(d => d.date);
+            // カテゴリリスト取得 (最初のデータのキーからdateを除外)
+            const categories = Object.keys(appData.trends[0]).filter(k => k !== 'date');
+
+            const datasets = categories.map((cat, i) => {
+                const color = PALETTE[i % PALETTE.length];
+                return {
+                    label: cat,
+                    data: appData.trends.map(d => d[cat] || 0), // 0.0 - 1.0 Normalized
+                    borderColor: color,
+                    backgroundColor: color,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: color,
+                    pointRadius: 5,
+                    tension: 0
+                };
+            });
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates, datasets: datasets },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top', align: 'end',
+                            labels: { usePointStyle: true, boxWidth: 8, font: { size: 11, family: 'Noto Sans JP', weight: 'bold' }, color: '#666' }
+                        },
+                        tooltip: {
+                            mode: 'index', intersect: false,
+                            callbacks: {
+                                label: (context) => ` ${context.dataset.label}` // 値は出さない
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: '#f5f5f5' }, ticks: { color: '#999', font: { size: 10 } } },
+                        y: { display: false } // Y軸(数値)非表示
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        }
+
+        function openOverlay(category) {
+            document.getElementById('chartOverlay').style.display = 'flex';
+            document.getElementById('overlayTitle').innerText = category;
+            document.getElementById('centerText').innerText = category;
+            renderDrilldown(category);
+        }
+
+        function closeOverlay() {
+            document.getElementById('chartOverlay').style.display = 'none';
+        }
+
+        function renderDrilldown(category) {
+            if (!appData.pie || !appData.pie[category]) return;
+            const ctx = document.getElementById('drilldownChart').getContext('2d');
+            
+            const items = appData.pie[category]; // [{label, percent}, ...]
+            const labels = items.map(d => d.label);
+            const data = items.map(d => d.percent);
+
+            if (drilldownChart) drilldownChart.destroy();
+
+            drilldownChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: PALETTE,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { pointStyle: 'circle', usePointStyle: true, padding: 20, font: { size: 11, family: 'Noto Sans JP' }, color: '#666' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` ${context.label}: ${context.raw}%` // ％のみ表示
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
