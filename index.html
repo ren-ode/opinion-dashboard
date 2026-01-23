@@ -34,12 +34,16 @@
         }
 
         /* Word Cloud エリア */
-        .word-cloud-container {
-            height: 400px; /* デフォルト */
+        #wordCloudContainer {
+            height: 400px; /* 固定高さ */
+            width: 100%;
             background-color: #fbfbfb;
             border-radius: 16px;
-            /* border: 1px solid #f0f0f0; */
             position: relative;
+            overflow: hidden; /* はみ出したキャンバスをトリミングというより、Fitさせる */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* トレンドチャート エリア */
@@ -66,9 +70,9 @@
         .section-title {
             font-weight: 900; font-size: 1.25rem;
             color: #333; margin-bottom: 1rem;
-            display: flex; align-items: baseline; gap: 0.5rem;
+            display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
         }
-        .section-note { font-size: 0.75rem; color: #999; font-weight: normal; }
+        .section-note { font-size: 0.8rem; color: #888; font-weight: normal; margin-left: auto; }
 
         /* HEADER */
         header { border-bottom: 1px solid #f0f0f0; }
@@ -103,7 +107,7 @@
             </div>
         </header>
 
-        <!-- PICKUP TOPICS (Moved to Top) -->
+        <!-- PICKUP TOPICS -->
         <div class="mb-12">
             <div class="text-center mb-2 text-xs font-bold text-gray-400">PICKUP TOPICS</div>
             <div id="pickupArea" class="pickup-box"></div>
@@ -113,20 +117,20 @@
         <section class="chart-section">
             <h2 class="section-title">
                 政策別 注目度ワードクラウド
-                <span class="section-note">集計: <span id="wcDateLabel">--月--日分</span></span>
+                <!-- 集計期間ID確認 -->
+                <span class="section-note">集計: <span id="wcDateLabel" class="font-bold text-teal-600">--日分</span></span>
             </h2>
             
-            <div class="word-cloud-container">
+            <div id="wordCloudContainer">
                 <canvas id="wordCloudChart"></canvas>
                 
-                <!-- Drilldown Overlay (Inside Container) -->
+                <!-- Drilldown Overlay -->
                 <div id="wcOverlay">
                     <button onclick="closeOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                     <!-- Center Details -->
                     <div class="relative w-[300px] h-[300px]">
-                         <!-- 垂直中央配置の修正: flexで明示的に中央揃え -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                             <span id="overlayCenterText" class="text-xl font-bold text-gray-700"></span>
                         </div>
@@ -165,7 +169,7 @@
                 if (!res.ok) throw new Error('Data load failed');
                 appData = await res.json();
                 
-                // Meta Info
+                // Meta Info Update
                 const meta = appData.meta || {};
                 document.getElementById('loading').style.display = 'none';
                 
@@ -173,8 +177,16 @@
                     const d = new Date(meta.lastUpdated);
                     document.getElementById('lastUpdated').innerText = d.toLocaleString('ja-JP');
                 }
-                if (meta.targetDateLabel) document.getElementById('wcDateLabel').innerText = meta.targetDateLabel;
-                if (meta.rangeLabel) document.getElementById('trendDateLabel').innerText = meta.rangeLabel;
+                // 明示的に確認してセット
+                if (meta.targetDateLabel) {
+                    document.getElementById('wcDateLabel').textContent = meta.targetDateLabel;
+                } else {
+                    document.getElementById('wcDateLabel').textContent = '日付不明';
+                }
+                
+                if (meta.rangeLabel) {
+                    document.getElementById('trendDateLabel').textContent = meta.rangeLabel;
+                }
 
                 renderPickups();
                 renderWordCloud();
@@ -205,33 +217,47 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-                        data: data.map(d => 15 + d.score * 0.8), // Size calculation
+                        data: data.map(d => {
+                            // サイズ調整: 最小10px, 最大係数0.5 (以前は0.8で大きすぎた)
+                            // スコア100の場合: 10 + 50 = 60px (400px高なら収まりやすい)
+                            return 10 + (d.score * 0.5); 
+                        }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
-                            // モノクロ濃淡: 100->#333, 0->#bbb
-                            const val = Math.floor(187 - (187 - 51) * (d.score/100)); // 187(#bb) ~ 51(#33)
+                            const val = Math.floor(187 - (187 - 51) * (d.score/100)); 
                             return `rgb(${val},${val},${val})`;
                         }
                     }]
                 },
                 options: {
                     maintainAspectRatio: false,
-                    elements: {
-                        word: {
-                            rotate: 0, // 完全横書き固定
-                            padding: 15,
-                            fontFamily: 'Noto Sans JP',
-                            fontWeight: '900',
-                            
-                            // ホバー時のエフェクト (chartjs-chart-wordcloudの仕様依存だが、colorなどが効く場合あり)
-                            hoverColor: '#8cd6d1', 
-                            hoverSize: 5 // 拡大効果
-                        }
+                    responsive: true,
+                    layout: {
+                        padding: 20 // パディング確保
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: { enabled: false }
+                        tooltip: { enabled: false } // ツールチップ無効化
+                    },
+                    elements: {
+                        word: {
+                            // --- 絶対配置修正: 横書き固定 ---
+                            rotationSteps: 2, 
+                            minRotation: 0,
+                            maxRotation: 0,
+                            rotate: 0, 
+
+                            padding: 10,
+                            fontFamily: 'Noto Sans JP',
+                            fontWeight: '900',
+                            
+                            // --- ホバー修正 ---
+                            // hoverSize を削除 (バグ回避)
+                            // hoverColor で色を変えてインタラクションを示す
+                            hoverColor: '#34d399', // Green-400 like
+                            hoverWeight: 'bold'
+                        }
                     },
                     onClick: (e, items) => {
                         if (items.length > 0) {
@@ -241,7 +267,6 @@
                         }
                     },
                     onHover: (e, items) => {
-                        // カーソル変更
                         e.native.target.style.cursor = items.length > 0 ? 'pointer' : 'default';
                     }
                 }
@@ -257,7 +282,7 @@
             
             if (!appData.pie || !appData.pie[category]) return;
             
-            const pData = appData.pie[category]; // [{label, percent}, ...]
+            const pData = appData.pie[category]; 
             const ctx = document.getElementById('drilldownChart').getContext('2d');
             
             if (pieChart) pieChart.destroy();
@@ -277,7 +302,7 @@
                     maintainAspectRatio: false,
                     cutout: '60%',
                     plugins: {
-                        legend: { display: false }, // シンプル化
+                        legend: { display: false },
                         tooltip: {
                             callbacks: { label: (c) => ` ${c.label}: ${c.raw}%` }
                         }
@@ -298,7 +323,6 @@
             if (trends.length === 0) return;
 
             const dates = trends.map(d => d.date);
-            // キーからdateを除外してカテゴリリスト作成
             const cats = Object.keys(trends[0]).filter(k => k !== 'date');
             
             const datasets = cats.map((cat, i) => ({
@@ -307,9 +331,9 @@
                 borderColor: PALETTE[i % PALETTE.length],
                 backgroundColor: PALETTE[i % PALETTE.length],
                 borderWidth: 2.5,
-                pointRadius: 0, // 通常時は点なし
+                pointRadius: 0,
                 pointHoverRadius: 6,
-                tension: 0.1, // 少し滑らかに
+                tension: 0.1,
                 fill: false
             }));
 
@@ -320,9 +344,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: true,
-                            position: 'bottom', // 下部中央
-                            align: 'center',
+                            display: true, position: 'bottom', align: 'center',
                             labels: {
                                 boxWidth: 10, usePointStyle: true, padding: 20,
                                 font: { size: 11, family: 'Noto Sans JP' }, color: '#666'
@@ -330,7 +352,7 @@
                         },
                         tooltip: {
                             mode: 'index', intersect: false,
-                            callbacks: { label: (c) => ` ${c.dataset.label}` } // 値なし
+                            callbacks: { label: (c) => ` ${c.dataset.label}` } 
                         }
                     },
                     scales: {
@@ -338,7 +360,7 @@
                             grid: { display: true, color: '#f5f5f5' },
                             ticks: { maxTicksLimit: 8, color: '#aaa', font: { size: 10 } }
                         },
-                        y: { display: false } // Y軸非表示
+                        y: { display: false } 
                     },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
