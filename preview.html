@@ -294,7 +294,7 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-                        data: data.map(d => 10 + (d.score * 0.5)),
+                        data: data.map(d => 9 + (d.score * 0.3)),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
@@ -306,7 +306,7 @@
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    layout: { padding: 20 },
+                    layout: { padding: 30 },
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
