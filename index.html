@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>YouTube Data Hub - Production</title>
@@ -8,20 +9,24 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
-        
+
         :root {
             --bg-body: #ffffff;
             --text-main: #333333;
             --text-sub: #666666;
-            --color-1: #8cd6d1; --color-2: #f7c97e;
-            --color-3: #f9a697; --color-4: #a7a6e0; --color-5: #a0d68c;
+            --color-1: #8cd6d1;
+            --color-2: #f7c97e;
+            --color-3: #f9a697;
+            --color-4: #a7a6e0;
+            --color-5: #a0d68c;
         }
 
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background: var(--bg-body);
             color: var(--text-main);
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             overflow-x: hidden;
         }
 
@@ -30,17 +35,20 @@
             width: 100%;
             max-width: 800px;
             margin: 0 auto 4rem auto;
-            position: relative; /* オーバーレイの基準 */
+            position: relative;
+            /* オーバーレイの基準 */
         }
 
         /* Word Cloud エリア */
         #wordCloudContainer {
-            height: 400px; /* 固定高さ */
+            height: 400px;
+            /* 固定高さ */
             width: 100%;
             background-color: #fbfbfb;
             border-radius: 16px;
             position: relative;
-            overflow: hidden; /* はみ出したキャンバスをトリミングというより、Fitさせる */
+            overflow: hidden;
+            /* はみ出したキャンバスをトリミングというより、Fitさせる */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -58,44 +66,88 @@
             z-index: 50;
             background: rgba(255, 255, 255, 0.98);
             border-radius: 16px;
-            display: none; /* 初期非表示 */
+            display: none;
+            /* 初期非表示 */
             flex-direction: column;
             align-items: center;
             justify-content: center;
             animation: fadeIn 0.2s ease-out;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
         .section-title {
-            font-weight: 900; font-size: 1.25rem;
-            color: #333; margin-bottom: 1rem;
-            display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem;
+            font-weight: 900;
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.5rem;
         }
-        .section-note { font-size: 0.8rem; color: #888; font-weight: normal; margin-left: auto; }
+
+        .section-note {
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: normal;
+            margin-left: auto;
+        }
 
         /* HEADER */
-        header { border-bottom: 1px solid #f0f0f0; }
+        header {
+            border-bottom: 1px solid #f0f0f0;
+        }
 
         /* PICKUPエリア */
         .pickup-box {
-            display: flex; flex-wrap: wrap; gap: 0.5rem;
-            justify-content: center; margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
         }
+
         .pickup-tag {
-            padding: 4px 12px; background: #fff;
-            border: 1px solid #e5e7eb; border-radius: 99px;
-            font-size: 0.75rem; font-weight: 700; color: #666;
+            padding: 4px 12px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #666;
         }
 
         /* ローディング */
-        #loading { position: fixed; inset: 0; background: #fff; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body class="p-6 md:p-12">
-    
+
     <!-- LOADING -->
-    <div id="loading"><div class="text-sm font-bold text-gray-400">LOADING DATA HUB...</div></div>
+    <div id="loading">
+        <div class="text-sm font-bold text-gray-400">LOADING DATA HUB...</div>
+    </div>
 
     <div class="max-w-4xl mx-auto">
         <!-- HEADER -->
@@ -119,14 +171,17 @@
                 政策別 注目度ワードクラウド
                 <span class="section-note">集計: <span id="wcDateLabel" class="font-bold text-teal-600">--日分</span></span>
             </h2>
-            
+
             <div id="wordCloudContainer">
                 <canvas id="wordCloudChart"></canvas>
-                
+
                 <!-- Drilldown Overlay -->
                 <div id="wcOverlay">
                     <button onclick="closeOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                     </button>
                     <!-- Center Details -->
                     <div class="relative w-[300px] h-[300px]">
@@ -150,7 +205,7 @@
                 <canvas id="lineChart"></canvas>
             </div>
         </section>
-        
+
     </div>
 
     <script>
@@ -167,11 +222,11 @@
                 const res = await fetch(DATA_SOURCE + '?t=' + new Date().getTime()); // Disable cache
                 if (!res.ok) throw new Error('Data load failed');
                 appData = await res.json();
-                
+
                 // Meta Info
                 const meta = appData.meta || {};
                 document.getElementById('loading').style.display = 'none';
-                
+
                 let lastUpdatedDate = null;
                 if (meta.lastUpdated) {
                     lastUpdatedDate = new Date(meta.lastUpdated);
@@ -183,11 +238,11 @@
                     document.getElementById('wcDateLabel').textContent = meta.targetDateLabel;
                 } else if (lastUpdatedDate) {
                     // Fallback to lastUpdated if specific target label is missing
-                    document.getElementById('wcDateLabel').textContent = `${lastUpdatedDate.getMonth()+1}月${lastUpdatedDate.getDate()}日分 (推定)`;
+                    document.getElementById('wcDateLabel').textContent = `${lastUpdatedDate.getMonth() + 1}月${lastUpdatedDate.getDate()}日分 (推定)`;
                 } else {
                     document.getElementById('wcDateLabel').textContent = '(日付データなし)';
                 }
-                
+
                 if (meta.rangeLabel) {
                     document.getElementById('trendDateLabel').textContent = meta.rangeLabel;
                 }
@@ -205,8 +260,8 @@
         // --- 1. PICKUP TOPICS ---
         function renderPickups() {
             if (!appData.wordCloud) return;
-            const topItems = [...appData.wordCloud].sort((a,b) => b.score - a.score).slice(0, 6);
-            document.getElementById('pickupArea').innerHTML = topItems.map(item => 
+            const topItems = [...appData.wordCloud].sort((a, b) => b.score - a.score).slice(0, 6);
+            document.getElementById('pickupArea').innerHTML = topItems.map(item =>
                 `<span class="pickup-tag">${item.text}</span>`
             ).join('');
         }
@@ -221,11 +276,11 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-                        data: data.map(d => 10 + (d.score * 0.5)), 
+                        data: data.map(d => 10 + (d.score * 0.5)),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
-                            const val = Math.floor(187 - (187 - 51) * (d.score/100)); 
+                            const val = Math.floor(187 - (187 - 51) * (d.score / 100));
                             return `rgb(${val},${val},${val})`;
                         }
                     }]
@@ -240,16 +295,16 @@
                     },
                     elements: {
                         word: {
-                            rotationSteps: 2, 
+                            rotationSteps: 2,
                             minRotation: 0,
                             maxRotation: 0,
-                            rotate: 0, 
+                            rotate: 0,
 
                             padding: 10,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
-                            
-                            hoverColor: '#34d399', 
+
+                            hoverColor: '#34d399',
                             hoverWeight: 'bold'
                         }
                     },
@@ -271,14 +326,14 @@
         function openOverlay(category) {
             const overlay = document.getElementById('wcOverlay');
             overlay.style.display = 'flex';
-            
+
             document.getElementById('overlayCenterText').innerText = category;
-            
+
             if (!appData.pie || !appData.pie[category]) return;
-            
-            const pData = appData.pie[category]; 
+
+            const pData = appData.pie[category];
             const ctx = document.getElementById('drilldownChart').getContext('2d');
-            
+
             if (pieChart) pieChart.destroy();
 
             pieChart = new Chart(ctx, {
@@ -301,9 +356,9 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            // 詳細ワード重複の修正: ラベル + % のみを表示
-                            callbacks: { 
-                                label: (c) => ` ${c.label}: ${c.raw}%` 
+                            callbacks: {
+                                title: () => null, // Hide title to prevent duplication
+                                label: (c) => ` ${c.label}: ${c.raw}%`
                             }
                         }
                     },
@@ -324,7 +379,7 @@
 
             const dates = trends.map(d => d.date);
             const cats = Object.keys(trends[0]).filter(k => k !== 'date');
-            
+
             const datasets = cats.map((cat, i) => ({
                 label: cat,
                 data: trends.map(d => d[cat]),
@@ -352,7 +407,7 @@
                         },
                         tooltip: {
                             mode: 'index', intersect: false,
-                            callbacks: { label: (c) => ` ${c.dataset.label}` } 
+                            callbacks: { label: (c) => ` ${c.dataset.label}` }
                         }
                     },
                     scales: {
@@ -360,7 +415,7 @@
                             grid: { display: true, color: '#f5f5f5' },
                             ticks: { maxTicksLimit: 8, color: '#aaa', font: { size: 10 } }
                         },
-                        y: { display: false } 
+                        y: { display: false }
                     },
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
@@ -371,4 +426,5 @@
         init();
     </script>
 </body>
+
 </html>
