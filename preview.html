@@ -210,16 +210,17 @@
             <div id="wordCloudContainer">
                 <canvas id="wordCloudChart"></canvas>
 
-                <!-- Drilldown Overlay -->
-                <div id="wcOverlay">
-                    <button onclick="closeOverlay()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
+                <!-- Drilldown Overlay (枠外クリックで閉じる) -->
+                <div id="wcOverlay" onclick="closeOverlay()">
+                    <button onclick="closeOverlay()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 z-50">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
-                    <!-- Center Details -->
-                    <div class="relative w-[300px] h-[300px]">
+                    <!-- Center Details (クリック伝播を停止) -->
+                    <div class="relative w-[85%] h-[85%] max-w-[320px] max-h-[320px]" onclick="event.stopPropagation()">
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                             <span id="overlayCenterText" class="text-base font-bold text-gray-700"></span>
                         </div>
@@ -407,7 +408,7 @@
                 options: {
                     maintainAspectRatio: false,
                     layout: {
-                        padding: 20 // 欠け防止パディング
+                        padding: 30 // 見切れ防止パディングを強化
                     },
                     cutout: '70%',
                     plugins: {
