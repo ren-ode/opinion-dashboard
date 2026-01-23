@@ -205,8 +205,8 @@
                                 d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
-                    <!-- Center Details (クリック伝播を停止) -->
-                    <div class="relative w-[95%] h-[95%] sm:w-[80%] sm:h-[80%] max-w-[320px] max-h-[320px]"
+                    <!-- Center Details (クリック伝播を停止) - サイズを拡大 (320px -> 420px) -->
+                    <div class="relative w-[95%] h-[95%] sm:w-[90%] sm:h-[90%] max-w-[420px] max-h-[420px]"
                         onclick="event.stopPropagation()">
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                             <span id="overlayCenterText" class="text-base font-bold text-gray-700"></span>
@@ -378,8 +378,8 @@
                 const meta = chart.getDatasetMeta(0);
                 meta.data.forEach((element, index) => {
                     const val = data.datasets[0].data[index];
-                    // 1%未満は線を描画しない
-                    if (val < 1 || !element.active) return;
+                    // 1%未満は表示を抑止（ユーザー要望）
+                    if (val < 1) return;
 
                     const { x, y, startAngle, endAngle, outerRadius } = element.getProps(['x', 'y', 'startAngle', 'endAngle', 'outerRadius'], true);
                     const midAngle = (startAngle + endAngle) / 2;
@@ -388,16 +388,16 @@
                     const startX = x + Math.cos(midAngle) * outerRadius;
                     const startY = y + Math.sin(midAngle) * outerRadius;
 
-                    // 引き出し線の終点 (datalabelsのoffset付近)
-                    const lineLen = 15;
+                    // 引き出し線の終点
+                    const lineLen = 12; // 以前より少し短くしてグラフを大きく
                     const endX = x + Math.cos(midAngle) * (outerRadius + lineLen);
                     const endY = y + Math.sin(midAngle) * (outerRadius + lineLen);
 
                     ctx.beginPath();
                     ctx.moveTo(startX, startY);
                     ctx.lineTo(endX, endY);
-                    ctx.strokeStyle = '#cbd5e1'; // 薄いグレー
-                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#94a3b8'; // 少し濃いめのグレーで見やすく
+                    ctx.lineWidth = 1.5;
                     ctx.stroke();
                 });
                 ctx.restore();
@@ -448,11 +448,11 @@
                     options: {
                         maintainAspectRatio: false,
                         layout: {
-                            // 外部ラベルと線のスペースを確保 (ニュース番組風の仕上がり用)
-                            padding: isSmallScreen ? 45 : 70
+                            // パディングを微調整してグラフ本体を大きく確保
+                            padding: isSmallScreen ? 35 : 45
                         },
-                        // 中央の穴を少し小さくして、全体のバランスを調整
-                        cutout: isSmallScreen ? '65%' : '60%',
+                        // 文字が収まる範囲で穴を大きく(70%)
+                        cutout: '70%',
                         plugins: {
                             legend: { display: false },
                             tooltip: {
@@ -462,17 +462,16 @@
                                 }
                             },
                             datalabels: {
-                                // 1%以上は強制表示 (display: true)
+                                // 1%以上は常時表示
                                 display: (context) => {
                                     if (pData.length <= 1) return true;
                                     const val = context.dataset.data[context.dataIndex];
                                     return val >= 1;
                                 },
-                                // ラベルを外側に配置
                                 anchor: 'end',
                                 align: 'end',
-                                offset: 18,
-                                color: '#444444',
+                                offset: 12, // 線に合わせて調整
+                                color: '#334155',
                                 font: {
                                     weight: 'bold',
                                     size: (context) => {
