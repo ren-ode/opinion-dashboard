@@ -288,8 +288,11 @@
 
         // --- 2. WORD CLOUD ---
         function renderWordCloud() {
+            const container = document.getElementById('wordCloudContainer');
             const ctx = document.getElementById('wordCloudChart').getContext('2d');
             const data = appData.wordCloud || [];
+
+            if (wcChart) wcChart.destroy();
 
             wcChart = new Chart(ctx, {
                 type: 'wordCloud',
@@ -298,13 +301,14 @@
                     datasets: [{
 
                         data: data.map(d => {
-                            // 画面幅に応じた動的フォントサイズ計算 (スマホ対応強化)
-                            const isSmallScreen = window.innerWidth < 768;
-                            const baseSize = isSmallScreen ? 10 : 14;
-                            const multiplier = isSmallScreen ? 0.35 : 0.6;
+                            // コンテナ幅に基づいた動的フォントサイズ計算
+                            const w = container.offsetWidth;
+                            const isSmall = w < 600;
+                            const baseSize = isSmall ? (w * 0.025) : (w * 0.018);
+                            const multiplier = isSmall ? (w * 0.0008) : (w * 0.0008);
                             const size = baseSize + (d.score * multiplier);
-                            // 上限キャップ (スマホ: 30px, PC: 55px)
-                            const maxSize = isSmallScreen ? 30 : 55;
+                            // 上限キャップ
+                            const maxSize = isSmall ? (w * 0.08) : (w * 0.07);
                             return Math.min(size, maxSize);
                         }),
                         color: (ctx) => {
@@ -319,7 +323,7 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        padding: window.innerWidth < 768 ? 25 : 15
+                        padding: container.offsetWidth < 600 ? 20 : 15
                     },
                     plugins: {
                         legend: { display: false },
@@ -332,7 +336,7 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            padding: window.innerWidth < 768 ? 3 : 4,
+                            padding: container.offsetWidth < 600 ? 3 : 4,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
@@ -405,9 +409,12 @@
 
         // --- 4. TREND CHART ---
         function renderTrendChart() {
+            const container = document.getElementById('lineChart').parentElement;
             const ctx = document.getElementById('lineChart').getContext('2d');
             const trends = appData.trends || [];
             if (trends.length === 0) return;
+
+            if (lineChart) lineChart.destroy();
 
             const dates = trends.map(d => d.date);
             const cats = Object.keys(trends[0]).filter(k => k !== 'date');
@@ -431,16 +438,16 @@
                 options: {
                     maintainAspectRatio: false,
                     layout: {
-                        padding: window.innerWidth < 768 ? 10 : 20
+                        padding: container.offsetWidth < 600 ? 10 : 20
                     },
                     plugins: {
                         legend: {
                             display: true, position: 'bottom', align: 'center',
                             labels: {
                                 boxWidth: 10, usePointStyle: true,
-                                padding: window.innerWidth < 768 ? 10 : 20,
+                                padding: container.offsetWidth < 600 ? 10 : 20,
                                 font: {
-                                    size: window.innerWidth < 768 ? 9 : 11,
+                                    size: container.offsetWidth < 600 ? 9 : 11,
                                     family: 'Noto Sans JP'
                                 },
                                 color: '#666'
@@ -457,7 +464,7 @@
                             offset: true, // 両端に余裕を持たせてマーカーの欠けを防ぐ
                             grid: { display: true, color: '#f5f5f5' },
                             ticks: {
-                                maxTicksLimit: window.innerWidth < 768 ? 4 : 8,
+                                maxTicksLimit: container.offsetWidth < 600 ? 4 : 8,
                                 color: '#aaa',
                                 font: { size: 10 }
                             }
@@ -470,6 +477,17 @@
         }
 
         window.closeOverlay = closeOverlay;
+
+        // --- 究極のレスポンシブ対応: リサイズ監視 ---
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                renderWordCloud();
+                renderTrendChart();
+            }, 250);
+        });
+
         init();
     </script>
 </body>
