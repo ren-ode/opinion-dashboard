@@ -410,6 +410,10 @@
                             }
                         },
                         datalabels: {
+                            display: (context) => {
+                                // 5%未満のセグメントはラベルを非表示にし、それ以外は衝突検知('auto')を有効化
+                                return context.dataset.data[context.dataIndex] < 5 ? false : 'auto';
+                            },
                             color: (context) => {
                                 const rgb = context.dataset.backgroundColor[context.dataIndex];
                                 // シンプルな輝度計算で白か黒を決定
