@@ -314,14 +314,23 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的フォントサイズ計算 (スマホ対応強化)
-                            const isSmallScreen = window.innerWidth < 768;
-                            const baseSize = isSmallScreen ? 10 : 14;
-                            const multiplier = isSmallScreen ? 0.35 : 0.6;
-                            const size = baseSize + (d.score * multiplier);
-                            // 上限キャップ (スマホ: 30px, PC: 55px)
-                            const maxSize = isSmallScreen ? 30 : 55;
-                            return Math.min(size, maxSize);
+                            // コンテナ幅に基づいた動的フォントサイズ計算 (360px見切れ修正版)
+                            const w = container.offsetWidth;
+                            const isSmall = w < 400;
+
+                            // 1. スコアに基づく基本サイズ
+                            const baseSize = isSmall ? (w * 0.025) : (w * 0.018);
+                            const multiplier = isSmall ? (w * 0.0008) : (w * 0.0008);
+                            const provisionalSize = baseSize + (d.score * multiplier);
+
+                            // 2. 「単語の長さ」に基づく物理的な制限 (見切れを絶対に防ぐ)
+                            const safetyPadding = isSmall ? 50 : 30;
+                            const maxSafeSize = (w - safetyPadding) / d.text.length;
+
+                            // 3. 画面幅に対する絶対的な上限 (スマホ時は横幅の15%以内に抑える)
+                            const maxAbsoluteSize = isSmall ? (w * 0.15) : (w * 0.07);
+
+                            return Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize);
                         }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
@@ -335,7 +344,7 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        padding: container.offsetWidth < 600 ? 20 : 15
+                        padding: container.offsetWidth < 400 ? 25 : 15
                     },
                     plugins: {
                         legend: { display: false },
@@ -348,7 +357,7 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            padding: container.offsetWidth < 600 ? 3 : 4,
+                            padding: container.offsetWidth < 400 ? 3 : 4,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
