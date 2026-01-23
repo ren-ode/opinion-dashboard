@@ -370,6 +370,7 @@
                         tooltip: {
                             // 詳細ワード重複の修正: ラベル + % のみを表示
                             callbacks: {
+                                title: () => null, // Hide title
                                 label: (c) => ` ${c.label}: ${c.raw}%`
                             }
                         }
