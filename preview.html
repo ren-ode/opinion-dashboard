@@ -425,6 +425,7 @@
                 data: { labels: dates, datasets: datasets },
                 options: {
                     maintainAspectRatio: false,
+                    layout: { padding: 10 }, // ホバー時の真円欠け防止
                     plugins: {
                         legend: {
                             display: true, position: 'bottom', align: 'center',
@@ -455,5 +456,3 @@
         init();
     </script>
 </body>
-
-</html>
