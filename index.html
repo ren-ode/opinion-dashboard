@@ -422,6 +422,7 @@
                         },
                         tooltip: {
                             mode: 'index', intersect: false,
+                            itemSort: (a, b) => b.raw - a.raw, // 値の大きい順 (上位順) にソート
                             callbacks: { label: (c) => ` ${c.dataset.label}` }
                         }
                     },
