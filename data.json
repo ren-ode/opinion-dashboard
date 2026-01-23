@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-23T03:24:00.119Z",
+  "lastUpdated": "2026-01-23T03:24:56.497Z",
   "wordCloud": [
     {
       "text": "外交・安保問題",
@@ -7,116 +7,120 @@
     },
     {
       "text": "外国人問題",
-      "score": 82
+      "score": 59
     },
     {
       "text": "教育・子育て支援",
-      "score": 25
+      "score": 16
     },
     {
       "text": "景気・物価高対策",
-      "score": 4
+      "score": 3
     },
     {
       "text": "原発・エネルギー政策",
-      "score": 15
-    },
-    {
-      "text": "ジェンダー・多様性",
       "score": 10
     },
     {
+      "text": "ジェンダー・多様性",
+      "score": 7
+    },
+    {
       "text": "政治とカネ",
-      "score": 37
+      "score": 24
     },
     {
       "text": "年金・社会保障",
-      "score": 79
+      "score": 50
     },
     {
       "text": "衆院選の是非",
-      "score": 24
+      "score": 16
+    },
+    {
+      "text": "大項目",
+      "score": 2
     }
   ],
   "pie": {
     "外交・安保問題": [
       {
         "label": "日中関係",
-        "percent": 15.2
+        "percent": 29.3
       },
       {
         "label": "防衛力",
-        "percent": 28
+        "percent": 34.4
       },
       {
         "label": "憲法改正",
-        "percent": 15.2
+        "percent": 9.8
       },
       {
         "label": "日米関係",
-        "percent": 25
+        "percent": 16
       },
       {
         "label": "台湾有事",
-        "percent": 4.3
+        "percent": 2.7
       },
       {
         "label": "防衛費",
-        "percent": 4.3
+        "percent": 2.7
       },
       {
         "label": "安保三文書",
-        "percent": 2.4
+        "percent": 1.6
       },
       {
         "label": "非核三原則",
-        "percent": 0.6
+        "percent": 0.4
       },
       {
         "label": "拉致",
-        "percent": 1.8
+        "percent": 1.2
       },
       {
         "label": "スパイ防止法",
-        "percent": 1.8
+        "percent": 1.2
       },
       {
         "label": "集団的自衛権",
-        "percent": 1.2
+        "percent": 0.8
       }
     ],
     "外国人問題": [
       {
         "label": "日本人ファースト",
-        "percent": 6.8
+        "percent": 16.6
       },
       {
         "label": "オーバーツーリズム",
-        "percent": 3
+        "percent": 4
       },
       {
         "label": "外国人参政権",
-        "percent": 5.3
+        "percent": 4.6
       },
       {
         "label": "移民問題",
-        "percent": 18.8
+        "percent": 16.6
       },
       {
         "label": "排外主義",
-        "percent": 2.3
+        "percent": 2
       },
       {
         "label": "クルド人",
-        "percent": 4.5
+        "percent": 4
       },
       {
         "label": "不法滞在",
-        "percent": 17.3
+        "percent": 15.2
       },
       {
         "label": "強制送還",
-        "percent": 4.5
+        "percent": 4
       },
       {
         "label": "土葬",
@@ -124,7 +128,7 @@
       },
       {
         "label": "土地取得",
-        "percent": 37.6
+        "percent": 33.1
       }
     ],
     "教育・子育て支援": [
@@ -320,6 +324,12 @@
         "label": "冬の選挙",
         "percent": 30.8
       }
+    ],
+    "大項目": [
+      {
+        "label": "詳細キーワード",
+        "percent": 100
+      }
     ]
   },
   "trends": [
@@ -333,7 +343,21 @@
       "ジェンダー・多様性": 0.098,
       "政治とカネ": 0.366,
       "年金・社会保障": 0.78,
-      "衆院選の是非": 0.238
+      "衆院選の是非": 0.238,
+      "大項目": 0
+    },
+    {
+      "date": "2026-01-22",
+      "外交・安保問題": 0.561,
+      "外国人問題": 0.11,
+      "教育・子育て支援": 0,
+      "景気・物価高対策": 0,
+      "原発・エネルギー政策": 0,
+      "ジェンダー・多様性": 0,
+      "政治とカネ": 0,
+      "年金・社会保障": 0,
+      "衆院選の是非": 0,
+      "大項目": 0.018
     }
   ]
 }
