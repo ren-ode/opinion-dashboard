@@ -158,6 +158,7 @@
         <!-- HEADER -->
         <header class="mb-10 pb-6 text-center">
             <h1 class="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-2">YouTube Data Hub</h1>
+            <p class="text-xs font-bold text-gray-400 tracking-[0.2em] uppercase">Visualizing Public Opinion</p>
             <div class="mt-4 text-[10px] text-gray-400 font-mono">
                 LAST UPDATED: <span id="lastUpdated">--/-- --:--</span>
             </div>
@@ -196,7 +197,7 @@
                     </div>
                 </div>
             </div>
-            <p class="text-center text-[10px] text-gray-400 mt-2">※キーワードをクリックすると詳細内訳を表示します。</p>
+            <p class="text-center text-[10px] text-gray-400 mt-2">※キーワードをクリックすると詳細内訳を表示します</p>
         </section>
 
         <!-- SECTION 2: TREND CHART -->
@@ -280,7 +281,16 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-                        data: data.map(d => 9 + (d.score * 0.3)),
+                        data: data.map(d => {
+                            // 画面幅に応じた動的フォントサイズ計算
+                            const isSmallScreen = window.innerWidth < 600;
+                            const baseSize = isSmallScreen ? 15 : 20; // 最小サイズを底上げ
+                            const multiplier = isSmallScreen ? 1.5 : 2.5; // 倍率を上げて最大化
+                            const size = baseSize + (d.score * multiplier);
+                            // 上限キャップ (スマホ: 60px, PC: 100px)
+                            const maxSize = isSmallScreen ? 60 : 100;
+                            return Math.min(size, maxSize);
+                        }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
@@ -292,7 +302,7 @@
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
-                    layout: { padding: 30 },
+                    layout: { padding: 2 }, // パディング最小化
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
@@ -304,7 +314,7 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            padding: 10,
+                            padding: 4, // ワード間隔最小化
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
