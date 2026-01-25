@@ -44,7 +44,8 @@
             max-width: 800px;
             margin: 0 auto 4rem auto;
             position: relative;
-            /* オーバーレイの基準 */
+            padding: 0 20px;
+            /* モバイル端の安全マージン */
         }
 
         /* Word Cloud エリア */
@@ -102,12 +103,14 @@
             animation: fadeIn 0.2s ease-out;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             pointer-events: none;
-            /* 非表示時はクリックを透過 */
+            visibility: hidden;
+            /* 非表示時はクリックを透過し、物理的にも隠す */
         }
 
         #wcOverlay.active {
             display: flex;
             pointer-events: auto;
+            visibility: visible;
             /* 表示時のみクリックを有効化 */
         }
 
@@ -367,8 +370,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 360px対応: 左右40px/上下25pxの安全圏を確保し、端の文字も確実にクリック可能に
-                        padding: container.offsetWidth < 400 ? { top: 25, right: 40, bottom: 25, left: 40 } : 15
+                        // 360px対応: 左右40px/上下30pxの絶対的な安全圏を確保
+                        padding: container.offsetWidth < 400 ? { top: 30, right: 40, bottom: 30, left: 40 } : 15
                     },
                     plugins: {
                         legend: { display: false },
