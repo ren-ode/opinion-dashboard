@@ -73,14 +73,16 @@
         }
 
         #wordCloudChart {
-            /* インセット・センタリング: コンテナ実寸での描画を物理サイズに適合 */
+            /* 固定解像度スケーリング: 内部 800px 描画をブラウザで相似縮小 */
             width: 100% !important;
-            height: 100% !important;
+            height: auto !important;
+            max-width: 100%;
+            display: block;
             overflow: visible !important;
             pointer-events: all;
-            /* クリック判定を確実に捕捉 */
             cursor: pointer;
-            touch-action: manipulation;
+            touch-action: none !important;
+            /* スマホでのスクロール干渉を完全に排除 */
             /* スマホのタップ遅延(300ms)を解消 */
         }
 
@@ -399,6 +401,42 @@
                 options: {
                     maintainAspectRatio: false,
                     responsive: false, // 勝手な再描画を停止し、CSS スケーリングに任せる
+                    onClick: (e) => {
+                        const chart = e.chart;
+                        const canvas = chart.canvas;
+                        const rect = canvas.getBoundingClientRect();
+
+                        // 表示サイズ(rect)と内部解像度(canvas.width/height)の比率を計算
+                        const scaleX = canvas.width / rect.width;
+                        const scaleY = canvas.height / rect.height;
+
+                        // クライアント座標(clientX/Y)をキャンバス内部座標に手動変換
+                        const cx = (e.native.clientX - rect.left) * scaleX;
+                        const cy = (e.native.clientY - rect.top) * scaleY;
+
+                        // 変換後の座標 {x: cx, y: cy} を使って要素を検索
+                        const elements = chart.getElementsAtEventForMode({ x: cx, y: cy }, 'nearest', { intersect: true }, true);
+
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            const label = chart.data.labels[idx];
+                            openOverlay(label);
+                        }
+                    },
+                    onHover: (e, elements) => {
+                        const chart = e.chart;
+                        const canvas = chart.canvas;
+                        const rect = canvas.getBoundingClientRect();
+
+                        const scaleX = canvas.width / rect.width;
+                        const scaleY = canvas.height / rect.height;
+
+                        const cx = (e.native.clientX - rect.left) * scaleX;
+                        const cy = (e.native.clientY - rect.top) * scaleY;
+
+                        const points = chart.getElementsAtEventForMode({ x: cx, y: cy }, 'nearest', { intersect: true }, true);
+                        e.native.target.style.cursor = points.length > 0 ? 'pointer' : 'default';
+                    },
                     layout: {
                         padding: 30 // 800px 時の適正バッファ
                     },
