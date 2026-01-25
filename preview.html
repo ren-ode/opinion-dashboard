@@ -66,8 +66,8 @@
 
         @media (max-width: 600px) {
             #wordCloudContainer {
-                aspect-ratio: 1 / 1 !important;
-                /* 正方形に厳格に固定 */
+                aspect-ratio: 16 / 9 !important;
+                /* スマホもPCと同じ 16:9 に統一 */
                 width: 100%;
             }
         }
@@ -354,19 +354,17 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 実寸キャンバス方式へ回帰 (仮想スケールによる座標ズレを排除)
-            const isMobile = window.innerWidth <= 400;
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            // 1. 高解像度相似スケーリング方式 (800x450 基準)
+            // 全デバイスで PC と同じ 16:9 の高品質レイアウトを生成します
+            const width = 800;
+            const height = 450;
 
             canvas.width = width;
             canvas.height = height;
 
-            // 2. 「究極の安定化」設定 (安全領域をコンテナの 60% に制限)
-            // これによりキーワードを中央に凝縮させ、端での見切れとクリック不全を物理的に排除します
-            const safeFactor = isMobile ? 0.6 : 0.8;
-            const safeWidth = width * safeFactor;
-            const safeHeight = height * safeFactor;
+            // PC 版の美しいパラメータを全デバイスで共通化
+            const safeWidth = width * 0.9;
+            const safeHeight = height * 0.9;
 
             const ctx = canvas.getContext('2d');
 
@@ -378,13 +376,12 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的なフォントサイズ [10, 20]
-                            // 360px画面で長い単語(10文字超)を収めるため、最大を 20px に抑制します
-                            const minSize = isMobile ? 10 : 18;
-                            const maxSize = isMobile ? 20 : 60;
+                            // PC基準の動的なフォントサイズ [18, 60] を全デバイスで採用
+                            const minSize = 18;
+                            const maxSize = 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 中央の安全エリアに収まるよう制限
+                            // 800x450 の計算空間に収まるよう制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -400,8 +397,7 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 中央寄りに配置を固定するためのパディング
-                        padding: isMobile ? (width * (1 - safeFactor) / 2) : 30
+                        padding: 30 // PC 版の余白感を継承
                     },
                     plugins: {
                         legend: { display: false },
@@ -415,8 +411,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 360px対応: 密集度を改善するためパディングを 4px に設定
-                            padding: isMobile ? 4 : 3,
+                            // PC基準の密集度 (パディング 3) を全デバイスで採用
+                            padding: 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
