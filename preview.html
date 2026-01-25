@@ -66,8 +66,8 @@
 
         @media (max-width: 600px) {
             #wordCloudContainer {
-                aspect-ratio: 1 / 1;
-                /* 正方形に復元 */
+                aspect-ratio: 1 / 1 !important;
+                /* 正方形に厳格に固定 */
                 width: 100%;
             }
         }
@@ -354,20 +354,21 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 仮想キャンバス方式 (スマホ時は 450x450 の広い仮想空間で固定)
+            // 1. 実寸キャンバス方式
             const isMobile = window.innerWidth <= 400;
-            const virtualWidth = isMobile ? 450 : container.clientWidth;
-            const virtualHeight = isMobile ? 450 : container.clientHeight;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
 
-            canvas.width = virtualWidth;
-            canvas.height = virtualHeight;
+            canvas.width = width;
+            canvas.height = height;
 
-            // 2. 「センター・フォーカス」設定 (上下合計120px、左右合計40pxの強力な余白)
-            // これによりキーワードを中央にギュッと凝縮させます
-            const deadZoneX = isMobile ? 20 : 15; // 片側分のマージン
-            const deadZoneY = isMobile ? 60 : 15;
-            const safeWidth = virtualWidth - (deadZoneX * 2);
-            const safeHeight = virtualHeight - (deadZoneY * 2);
+            // 2. 「インセット・センタリング」設定 (上下 80px、左右 40px の強力な絞り込み)
+            // これにより描画を中央の安全圏に強制し、境界でのクリック不全を解消します
+            const pTopBottom = isMobile ? 80 : 30;
+            const pLeftRight = isMobile ? 40 : 30;
+
+            const safeWidth = width - (pLeftRight * 2);
+            const safeHeight = height - (pTopBottom * 2);
 
             const ctx = canvas.getContext('2d');
 
@@ -379,12 +380,12 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的なフォントサイズ Range [12, 30]
-                            const minSize = isMobile ? 12 : 18;
-                            const maxSize = isMobile ? 30 : 60;
+                            // 画面幅に応じた動的なフォントサイズ [10, 24]
+                            const minSize = isMobile ? 10 : 18;
+                            const maxSize = isMobile ? 24 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 仮想空間内での制限 (中央エリアに収まるサイズ)
+                            // 中央の狭いエリアに収まるよう制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -400,12 +401,12 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 中央寄りに配置を固定するためのパディング設定 (合計 40px / 120px)
+                        // 強力な物理パディングにより中央へ凝縮 (上下 80 / 左右 40)
                         padding: {
-                            left: deadZoneX,
-                            right: deadZoneX,
-                            top: deadZoneY,
-                            bottom: deadZoneY
+                            top: pTopBottom,
+                            bottom: pTopBottom,
+                            left: pLeftRight,
+                            right: pLeftRight
                         }
                     },
                     plugins: {
