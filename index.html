@@ -338,17 +338,17 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 高解像度相似スケーリング方式 (800x450 基準)
-            // 全デバイスで PC と同じ 16:9 の高品質レイアウトを生成します
+            // 1. 絶対的マスター・キャンバス方式 (800x450 基準)
+            // デバイスに関わらず、PC 版 (800px) で最高に見えるレイアウトを「固定」で生成します
             const width = 800;
             const height = 450;
 
             canvas.width = width;
             canvas.height = height;
 
-            // PC 版の美しいパラメータを全デバイスで共通化
-            const safeWidth = width * 0.9;
-            const safeHeight = height * 0.9;
+            // PC 版の黄金比率
+            const safeWidth = width * 0.95;
+            const safeHeight = height * 0.95;
 
             const ctx = canvas.getContext('2d');
             if (wcChart) wcChart.destroy();
@@ -359,12 +359,12 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // PC基準の動的なフォントサイズ [18, 60] を全デバイスで採用
+                            // PC 版の [18, 60] というダイナミックな対比を「絶対」として採用
                             const minSize = 18;
                             const maxSize = 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 800x450 の計算空間に収まるよう制限
+                            // 800px 空間での余裕のある制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -380,7 +380,7 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        padding: 30 // PC 版の余白感を継承
+                        padding: 15 // PC 版で最も美しく見える密集感のための余白
                     },
                     plugins: {
                         legend: { display: false },
@@ -394,7 +394,7 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // PC基準の密集度 (パディング 3) を全デバイスで採用
+                            // PC基準（パディング 3）を絶対固定
                             padding: 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
