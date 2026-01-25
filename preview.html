@@ -52,6 +52,7 @@
         /* Word Cloud エリア (PC: 16:9 / スマホ: 1:1.1) */
         #wordCloudContainer {
             width: 100%;
+            max-width: 800px;
             aspect-ratio: 16 / 9;
             margin: 0 auto;
             background-color: #fbfbfb;
@@ -68,11 +69,12 @@
                 aspect-ratio: 1 / 1.1;
                 /* 縦に余裕を持たせて見切れを防止 */
                 max-width: 500px;
+                width: 100%;
             }
         }
 
         #wordCloudChart {
-            /* レスポンシブ対応: コンテナサイズに合わせて自動伸縮 */
+            /* 見切れ防止の逃げ道: CSSでコンテナいっぱいに広げつつ、解像度側で余裕を持たせる */
             width: 100% !important;
             height: 100% !important;
             overflow: visible !important;
@@ -350,16 +352,20 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 仮想描画解像度の設定 (物理的なカットを防ぐため、実際のサイズより少し大きめに計算領域を確保)
+            // 1. 物理サイズの取得
             const width = container.clientWidth;
             const height = container.clientHeight;
 
-            // スマホ時は 50px の「絶対禁止区域」を設ける
-            const isSmall = width < 400;
-            const padding = isSmall ? 50 : 20;
+            // 2. 「逃げ道」の作成 (Canvas解像度を物理サイズより上下左右10px広く設定)
+            // これにより境界ギリギリの文字がカットされるのを防ぐ (SVG viewBox近似)
+            const resolutionBuffer = 20;
+            canvas.width = width + resolutionBuffer;
+            canvas.height = height + resolutionBuffer;
 
-            canvas.width = width;
-            canvas.height = height;
+            // 3. 配置計算用の「安全な箱」 (上下左右に 30px の絶対進入禁止エリア)
+            const safeMargin = 30;
+            const safeWidth = width - (safeMargin * 2);
+            const safeHeight = height - (safeMargin * 2);
 
             const ctx = canvas.getContext('2d');
 
@@ -371,13 +377,14 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
+                            const isSmallScreen = width < 400;
                             // 画面幅に応じた動的なフォントサイズレンジ
-                            const minSize = isSmall ? 12 : 18;
-                            const maxSize = isSmall ? 35 : 60;
+                            const minSize = isSmallScreen ? 12 : 18;
+                            const maxSize = isSmallScreen ? 35 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 見切れ防止ガード (設定されたパディングの2倍分を差し引く)
-                            const maxSafeSize = (width - (padding * 2)) / d.text.length;
+                            // 「安全な箱」を超えないように制限
+                            const maxSafeSize = safeWidth / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
@@ -392,8 +399,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 文字が境界に触れないよう、強力なパディングを設定
-                        padding: padding
+                        // 文字が物理境界に触れないよう、安全マージンを適用
+                        padding: safeMargin
                     },
                     plugins: {
                         legend: { display: false },
