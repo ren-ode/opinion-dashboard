@@ -358,7 +358,8 @@
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: { enabled: false }
+                        tooltip: { enabled: false },
+                        datalabels: { display: false }
                     },
                     elements: {
                         word: {
@@ -447,15 +448,40 @@
                                 }
                             },
                             datalabels: {
-                                // 強制表示（重なり防止が必要な場合は 'auto'）
-                                display: true,
-                                // 指示通りの配置とスタイル
+                                // 重なり防止のため 'auto' に変更
+                                display: 'auto',
                                 anchor: 'center',
                                 align: 'center',
-                                color: '#fff',
+                                // 背景の輝度を判定して白か黒（濃いグレー）を選択
+                                color: (context) => {
+                                    const bgColor = context.dataset.backgroundColor[context.dataIndex];
+                                    if (!bgColor) return '#fff';
+
+                                    // HEX または RGB から輝度を算出
+                                    let r, g, b;
+                                    if (bgColor.startsWith('#')) {
+                                        const hex = bgColor.replace('#', '');
+                                        r = parseInt(hex.substring(0, 2), 16);
+                                        g = parseInt(hex.substring(2, 4), 16);
+                                        b = parseInt(hex.substring(4, 6), 16);
+                                    } else {
+                                        const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                                        if (match) {
+                                            r = parseInt(match[1]);
+                                            g = parseInt(match[2]);
+                                            b = parseInt(match[3]);
+                                        } else {
+                                            return '#fff';
+                                        }
+                                    }
+
+                                    // 輝度（Luminance）の算出公式 Y = 0.299R + 0.587G + 0.114B
+                                    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+                                    return luminance > 180 ? '#333' : '#fff'; // 明るい背景なら濃いグレー、暗いなら白
+                                },
                                 font: {
                                     weight: 'bold',
-                                    size: 12
+                                    size: isSmallScreen ? 10 : 11 // 少し小さめに調整
                                 },
                                 formatter: (value, context) => {
                                     return context.chart.data.labels[context.dataIndex];
