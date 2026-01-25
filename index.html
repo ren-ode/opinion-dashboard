@@ -22,13 +22,18 @@
             --color-5: #a0d68c;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background: var(--bg-body);
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow-x: hidden !important;
         }
 
         /* 共通チャートコンテナ */
@@ -324,8 +329,8 @@
                             const safetyPadding = isSmall ? 50 : 30;
                             const maxSafeSize = (w - safetyPadding) / d.text.length;
 
-                            // 3. 画面幅に対する絶対的な上限 (スマホ時は横幅の13.5%以内に抑え、見切れをさらに防ぐ)
-                            const maxAbsoluteSize = isSmall ? (w * 0.135) : (w * 0.07);
+                            // 3. 画面幅に対する絶対的な上限 (スマホ時は横幅の10.8%以内[前回の20%減]に抑え、絶対に見切れないようにする)
+                            const maxAbsoluteSize = isSmall ? (w * 0.108) : (w * 0.07);
 
                             return Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize);
                         }),
@@ -341,7 +346,7 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        padding: container.offsetWidth < 400 ? 30 : 15 // 360px対応: 左右マージンをさらに確保
+                        padding: container.offsetWidth < 400 ? 40 : 15 // 360px完全対応: 安全マージンを40pxに拡大
                     },
                     plugins: {
                         legend: { display: false },
@@ -422,7 +427,7 @@
                     options: {
                         maintainAspectRatio: false,
                         layout: {
-                            padding: isSmallScreen ? 35 : 25 // スマホ時はさらにパディングを広げてグラフを小さくする
+                            padding: isSmallScreen ? 40 : 25 // スマホ時は40pxパディングでグラフをよりコンパクトに
                         },
                         // 文字が収まる範囲で穴を調整(60%)
                         cutout: '60%',
