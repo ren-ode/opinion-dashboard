@@ -73,17 +73,14 @@
         }
 
         #wordCloudChart {
-            /* 固定解像度スケーリング: 内部 800px 描画をブラウザで相似縮小 */
+            /* ダイナミックスケーリング: デバイス実寸に合わせて再描画 */
             width: 100% !important;
-            height: auto !important;
-            max-width: 100%;
-            display: block;
+            height: 100% !important;
             overflow: visible !important;
             pointer-events: all;
             cursor: pointer;
-            touch-action: none !important;
-            /* スマホでのスクロール干渉を完全に排除 */
-            /* スマホのタップ遅延(300ms)を解消 */
+            touch-action: manipulation !important;
+            /* スマホのタップ遅延解消とスクロールの両立 */
         }
 
         /* トレンドチャート エリア */
@@ -356,18 +353,18 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 固定解像度スケーリング方式 (800px 基準)
-            // デバイスに関わらず 800px 基準で描画し、CSS で相似縮小します。
+            // 1. ダイナミックスケーリング方式
+            // デバイスの実寸に合わせて、Chart.js が最適な解像度で再描画します。
+            const width = container.clientWidth;
+            const height = container.clientHeight;
             const isMobile = window.innerWidth <= 600;
-            const width = 800;
-            const height = isMobile ? 800 : 450;
 
             canvas.width = width;
             canvas.height = height;
 
-            // マスター解像度 (800px) における黄金比
-            const safeWidth = width * 0.95;
-            const safeHeight = height * 0.95;
+            // 安全領域の設定（モバイルは少し広めに取ることで見切れるリスクを物理的にゼロにします）
+            const safeWidth = width * (isMobile ? 0.85 : 0.95);
+            const safeHeight = height * (isMobile ? 0.85 : 0.95);
 
             const ctx = canvas.getContext('2d');
 
@@ -379,13 +376,13 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 800px 時の黄金パラメータ [18, 60] を固定採用。
-                            // デバイス幅に応じた縮小は CSS (width:100%) が一括で行います。
-                            const minSize = 18;
-                            const maxSize = 60;
+                            // デバイス幅に応じた柔軟なフォントレンジ
+                            // モバイル [12, 32] / PC [18, 60]
+                            const minSize = isMobile ? 12 : 18;
+                            const maxSize = isMobile ? 32 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 800px 空間内での余裕のある制限
+                            // コンテナ空間内での物理的な制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -400,45 +397,22 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    responsive: false, // 勝手な再描画を停止し、CSS スケーリングに任せる
+                    responsive: true, // 自動レスポンシブを有効化
                     onClick: (e) => {
                         const chart = e.chart;
-                        const canvas = chart.canvas;
-                        const rect = canvas.getBoundingClientRect();
-
-                        // 表示サイズ(rect)と内部解像度(canvas.width/height)の比率を計算
-                        const scaleX = canvas.width / rect.width;
-                        const scaleY = canvas.height / rect.height;
-
-                        // クライアント座標(clientX/Y)をキャンバス内部座標に手動変換
-                        const cx = (e.native.clientX - rect.left) * scaleX;
-                        const cy = (e.native.clientY - rect.top) * scaleY;
-
-                        // 変換後の座標 {x: cx, y: cy} を使って要素を検索
-                        const elements = chart.getElementsAtEventForMode({ x: cx, y: cy }, 'nearest', { intersect: true }, true);
-
-                        if (elements.length > 0) {
-                            const idx = elements[0].index;
-                            const label = chart.data.labels[idx];
-                            openOverlay(label);
+                        // 実寸描画のため標準の判定で 100% 正確に反応します
+                        const points = chart.getElementsAtEventForMode(e.native, 'nearest', { intersect: true }, true);
+                        if (points.length > 0) {
+                            const idx = points[0].index;
+                            const text = chart.data.labels[idx];
+                            openOverlay(text);
                         }
                     },
                     onHover: (e, elements) => {
-                        const chart = e.chart;
-                        const canvas = chart.canvas;
-                        const rect = canvas.getBoundingClientRect();
-
-                        const scaleX = canvas.width / rect.width;
-                        const scaleY = canvas.height / rect.height;
-
-                        const cx = (e.native.clientX - rect.left) * scaleX;
-                        const cy = (e.native.clientY - rect.top) * scaleY;
-
-                        const points = chart.getElementsAtEventForMode({ x: cx, y: cy }, 'nearest', { intersect: true }, true);
-                        e.native.target.style.cursor = points.length > 0 ? 'pointer' : 'default';
+                        e.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
                     },
                     layout: {
-                        padding: 30 // 800px 時の適正バッファ
+                        padding: isMobile ? 10 : 20 // 適度な余白感をデバイス別に調整
                     },
                     plugins: {
                         legend: { display: false },
@@ -452,23 +426,13 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 800px 時の密集度 (パディング 5) を固定。
-                            padding: 5,
+                            // 柔軟な密集度設定
+                            padding: isMobile ? 3 : 5,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
                             hoverColor: '#34d399',
                             hoverWeight: 'bold'
                         }
-                    },
-                    onClick: (e, items) => {
-                        if (items.length > 0) {
-                            const idx = items[0].index;
-                            const text = wcChart.data.labels[idx];
-                            openOverlay(text);
-                        }
-                    },
-                    onHover: (e, items) => {
-                        e.native.target.style.cursor = items.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });
