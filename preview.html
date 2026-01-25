@@ -44,8 +44,8 @@
             max-width: 800px;
             margin: 0 auto 4rem auto;
             position: relative;
-            padding: 0 20px;
-            /* モバイル端の安全マージン */
+            padding: 0;
+            /* 360px対応: エッジ・トゥ・エッジ描画のため余白撤廃 */
         }
 
         /* Word Cloud エリア */
@@ -63,7 +63,9 @@
         }
 
         #wordCloudChart {
-            /* 当たり判定を安定させるため、境界でのクリッピングを抑制 */
+            /* 360px対応: 仮想マージン（見えない余白）を設けて端点クリックを100%捕捉 */
+            width: 110% !important;
+            margin-left: -5%;
             overflow: visible !important;
             pointer-events: auto;
         }
@@ -363,8 +365,8 @@
                             // 3. 画面幅に対する絶対的な上限
                             const maxAbsoluteSize = isSmall ? (w * 0.15) : (w * 0.07);
 
-                            // 4. 下限値の設定 (全ての文字が入り切るよう 10px を許可)
-                            const minSize = isSmall ? 10 : 12;
+                            // 4. 下限値の固定 (全ての文字が入り切るよう 12px を死守)
+                            const minSize = 12;
 
                             return Math.max(minSize, Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize));
                         }),
@@ -380,8 +382,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // エリアを広く使い、全てのキーワードが入るスペースを確保
-                        padding: container.offsetWidth < 400 ? 10 : 15
+                        // 360px対応: 描画エリアを100%使い切り、キーワード消失を完全に防ぐ
+                        padding: 0
                     },
                     plugins: {
                         legend: { display: false },
