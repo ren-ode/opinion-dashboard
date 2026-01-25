@@ -71,15 +71,15 @@
         }
 
         #wordCloudChart {
-            /* インセット・スケーリング: 仮想空間(450px)での描画を物理サイズに適合 */
+            /* インセット・センタリング: コンテナ実寸での描画を物理サイズに適合 */
             width: 100% !important;
-            height: auto !important;
-            max-height: 100% !important;
+            height: 100% !important;
             overflow: visible !important;
-            /* 計算境界を超えても判定を捨てない */
             pointer-events: all;
             /* クリック判定を確実に捕捉 */
             cursor: pointer;
+            touch-action: manipulation;
+            /* スマホのタップ遅延(300ms)を解消 */
         }
 
         /* トレンドチャート エリア */
@@ -338,7 +338,7 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 実寸キャンバス方式
+            // 1. 実寸キャンバス方式へ回帰 (仮想スケールによる座標ズレを排除)
             const isMobile = window.innerWidth <= 400;
             const width = container.clientWidth;
             const height = container.clientHeight;
@@ -346,8 +346,8 @@
             canvas.width = width;
             canvas.height = height;
 
-            // 2. 「インセット・センタリング」設定 (上下 80px、左右 40px の強力な絞り込み)
-            // これにより描画を中央の安全圏に強制し、境界でのクリック不全を解消します
+            // 2. 巨大な「安全マージン」の強制 (上下に 80px、左右に 40px)
+            // 描画エンジンに対し、中央の狭いエリア以外には絶対に描画させない命令
             const pTopBottom = isMobile ? 80 : 30;
             const pLeftRight = isMobile ? 40 : 30;
 
@@ -355,7 +355,6 @@
             const safeHeight = height - (pTopBottom * 2);
 
             const ctx = canvas.getContext('2d');
-
             if (wcChart) wcChart.destroy();
 
             wcChart = new Chart(ctx, {
@@ -365,6 +364,7 @@
                     datasets: [{
                         data: data.map(d => {
                             // 画面幅に応じた動的なフォントサイズ [10, 24]
+                            // 最大を24まで下げることで、長い単語も安全領域に収めます
                             const minSize = isMobile ? 10 : 18;
                             const maxSize = isMobile ? 24 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
@@ -405,11 +405,10 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 360px対応: タップ判定を安定させるため、スマホ時はパディングを 8px に拡大
-                            padding: isMobile ? 8 : 3,
+                            // 360px対応: タップターゲットを独立させるため、スマホ時はパディングを 10px に拡大
+                            padding: isMobile ? 10 : 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
-
                             hoverColor: '#34d399',
                             hoverWeight: 'bold'
                         }
