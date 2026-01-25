@@ -47,13 +47,15 @@
         }
 
         /* Word Cloud エリア */
+        /* Word Cloud エリア (中央集権型: 500px正方形に固定) */
         #wordCloudContainer {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            max-width: 500px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
             background-color: #fbfbfb;
             border-radius: 16px;
             position: relative;
-            /* 枠外のクリック判定も拾えるように visible を適用 */
             overflow: visible !important;
             display: flex;
             align-items: center;
@@ -343,21 +345,17 @@
                     datasets: [{
 
                         data: data.map(d => {
-                            // 仮想サイズ(500px)に基づいた安定したフォントサイズ計算
+                            // 仮想サイズ(500px正方形)に基づいた中央集中型計算
                             const w = virtualSize;
-                            const isSmallScreen = container.offsetWidth < 400; // 画面幅判定
 
-                            // 仮想空間内での基本サイズ設計 [15, 60]
-                            const minSize = 15;
-                            const maxSize = 60;
+                            // 仮想空間内での基本サイズ設計 [16, 50]
+                            const minSize = 16;
+                            const maxSize = 50;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 単語の長さによる仮想領域内での制限 (マージン50px分を考慮して100を差し引く)
-                            const maxSafeSize = (virtualSize - 100) / d.text.length;
-                            const finalSize = Math.min(size, maxSafeSize);
-
-                            // スマホ時（400px以下）は計算結果をさらに 20% 縮小して見切れを徹底防止
-                            return isSmallScreen ? finalSize * 0.8 : finalSize;
+                            // 単語の長さによる仮想領域内での制限 (30pxのバリアを考慮して60を差し引く)
+                            const maxSafeSize = (virtualSize - 60) / d.text.length;
+                            return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
@@ -371,8 +369,8 @@
                     maintainAspectRatio: false,
                     responsive: false, // 仮想サイズを維持するためOFF
                     layout: {
-                        // 仮想空間内での50pxセーフティパディング (見切れを物理的に防ぐ)
-                        padding: 50
+                        // 仮想空間内での30pxセーフティバリア (見切れを物理的に防ぐ)
+                        padding: 30
                     },
                     plugins: {
                         legend: { display: false },
@@ -386,8 +384,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 360px対応: スマホ時はパディングを 12px に増やし、タップ判定を安定させる
-                            padding: container.offsetWidth < 600 ? 12 : 4,
+                            // 360px対応: 文字を中央に密集させるためパディングを 3px に縮小
+                            padding: 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
