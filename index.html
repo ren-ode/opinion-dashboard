@@ -99,6 +99,14 @@
             justify-content: center;
             animation: fadeIn 0.2s ease-out;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            pointer-events: none;
+            /* 非表示時はクリックを透過 */
+        }
+
+        #wcOverlay.active {
+            display: flex;
+            pointer-events: auto;
+            /* 表示時のみクリックを有効化 */
         }
 
         @keyframes fadeIn {
@@ -346,7 +354,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        padding: container.offsetWidth < 400 ? 40 : 15 // 360px完全対応: 安全マージンを40pxに拡大
+                        // 360px対応: 左右40px/上下25pxの安全圏を確保し、端の文字も確実にクリック可能に
+                        padding: container.offsetWidth < 400 ? { top: 25, right: 40, bottom: 25, left: 40 } : 15
                     },
                     plugins: {
                         legend: { display: false },
@@ -385,7 +394,7 @@
         // --- 3. OVERLAY & PIE CHART (INTERNAL LABELS) ---
         function openOverlay(category) {
             const overlay = document.getElementById('wcOverlay');
-            overlay.style.display = 'flex';
+            overlay.classList.add('active');
             document.getElementById('overlayCenterText').innerText = category;
 
             const ctx = document.getElementById('drilldownChart').getContext('2d');
@@ -468,7 +477,7 @@
         }
 
         function closeOverlay() {
-            document.getElementById('wcOverlay').style.display = 'none';
+            document.getElementById('wcOverlay').classList.remove('active');
         }
 
         // --- 4. TREND CHART ---
