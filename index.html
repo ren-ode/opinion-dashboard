@@ -70,10 +70,13 @@
         }
 
         #wordCloudChart {
-            /* 見切れ防止の逃げ道: CSSでコンテナいっぱいに広げつつ、解像度側で余裕を持たせる */
+            /* インセット・スケーリング: 仮想空間(450px)での描画を物理サイズに適合 */
             width: 100% !important;
-            height: 100% !important;
-            pointer-events: auto;
+            height: auto !important;
+            max-height: 100% !important;
+            overflow: visible !important;
+            pointer-events: all;
+            cursor: pointer;
         }
 
         /* トレンドチャート エリア */
@@ -333,24 +336,17 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 物理サイズの取得
-            const width = container.clientWidth;
-            const height = container.clientHeight;
+            // 1. 仮想キャンバス方式 (スマホ時は 450x450 の広い仮想空間で固定)
+            const isMobile = window.innerWidth <= 400;
+            const virtualWidth = isMobile ? 450 : container.clientWidth;
+            const virtualHeight = isMobile ? 450 : container.clientHeight;
 
-            // 2. 「逃げ道」の作成 (Canvas解像度を物理サイズより上下左右10px広く設定)
-            // これにより境界ギリギリの文字がカットされるのを防ぐ (SVG viewBox近似)
-            const resolutionBuffer = 20;
-            canvas.width = width + resolutionBuffer;
-            canvas.height = height + resolutionBuffer;
+            canvas.width = virtualWidth;
+            canvas.height = virtualHeight;
 
-            // 3. 配置計算用の「安全な箱」
-            const isSmall = width < 400;
-            // スマホ時は計算領域を 80% に絞り込み、周囲に 40px 以上の絶対的な余白を作る
-            const shrinkFactor = isSmall ? 0.8 : 1.0;
-            const safeMargin = isSmall ? 10 : 30; // 進入禁止エリア
-
-            const safeWidth = (width * shrinkFactor) - (safeMargin * 2);
-            const safeHeight = (height * shrinkFactor) - (safeMargin * 2);
+            // 2. 「強力なデッドゾーン」の設定 (仮想空間内で 50px)
+            const deadZone = isMobile ? 50 : 25;
+            const safeWidth = virtualWidth - (deadZone * 2);
 
             const ctx = canvas.getContext('2d');
 
@@ -361,15 +357,13 @@
                 data: {
                     labels: data.map(d => d.text),
                     datasets: [{
-
                         data: data.map(d => {
-                            // 画面幅に応じた動的なフォントサイズレンジ
-                            // スマホ時は最大サイズをさらに 20% 縮小 (最大 28px 程度)
-                            const minSize = isSmall ? 12 : 18;
-                            const maxSize = isSmall ? 28 : 60;
+                            // 画面幅に応じた動的なフォントサイズ
+                            const minSize = isMobile ? 12 : 18;
+                            const maxSize = isMobile ? 28 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 「安全な箱」を超えないように制限
+                            // 仮想空間内での制限
                             const maxSafeSize = safeWidth / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -385,8 +379,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 文字が物理境界に触れないよう、安全マージンを適用
-                        padding: safeMargin
+                        // 仮想空間内での強力なデッドゾーンを確保
+                        padding: deadZone
                     },
                     plugins: {
                         legend: { display: false },
