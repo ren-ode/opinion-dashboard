@@ -66,8 +66,8 @@
 
         @media (max-width: 600px) {
             #wordCloudContainer {
-                aspect-ratio: 16 / 9 !important;
-                /* スマホもPCと同じ 16:9 に統一 */
+                aspect-ratio: 1 / 1 !important;
+                /* スマホ時は正方形に固定 */
                 width: 100%;
             }
         }
@@ -354,15 +354,16 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 1. 絶対 master Resolution (800x450 基準)
-            // いかなる画面サイズでも、PC (800px) で最高に見える絵を「固定」で生成します
+            // 1. 固定解像度スケーリング方式 (800px 基準)
+            // デバイスに関わらず 800px 基準で描画し、CSS で相似縮小します。
+            const isMobile = window.innerWidth <= 600;
             const width = 800;
-            const height = 450;
+            const height = isMobile ? 800 : 450;
 
             canvas.width = width;
             canvas.height = height;
 
-            // PC 版の黄金比率
+            // マスター解像度 (800px) における黄金比
             const safeWidth = width * 0.95;
             const safeHeight = height * 0.95;
 
@@ -376,15 +377,17 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // PC 版の [18, 60] というダイナミックな対比を「絶対」として採用
+                            // 800px 時の黄金パラメータ [18, 60] を固定採用。
+                            // デバイス幅に応じた縮小は CSS (width:100%) が一括で行います。
                             const minSize = 18;
                             const maxSize = 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 800px 空間での余裕のある制限
+                            // 800px 空間内での余裕のある制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
+
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
                             if (!d) return '#ccc';
@@ -395,9 +398,9 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    responsive: true,
+                    responsive: false, // 勝手な再描画を停止し、CSS スケーリングに任せる
                     layout: {
-                        padding: 15 // PC 版で最も美しく見える密集感のための余白
+                        padding: 30 // 800px 時の適正バッファ
                     },
                     plugins: {
                         legend: { display: false },
@@ -411,8 +414,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // PC基準（パディング 3）を絶対固定
-                            padding: 3,
+                            // 800px 時の密集度 (パディング 5) を固定。
+                            padding: 5,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
                             hoverColor: '#34d399',
