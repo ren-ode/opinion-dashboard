@@ -63,9 +63,9 @@
         }
 
         #wordCloudChart {
-            /* 360px対応: 仮想マージン（見えない余白）を設けて端点クリックを100%捕捉 */
-            width: 110% !important;
-            margin-left: -5%;
+            /* 仮想キャンバス方式: 広い空間(500px)で描画したものを360px枠に自動縮小 */
+            width: 100% !important;
+            height: auto !important;
             overflow: visible !important;
             pointer-events: auto;
         }
@@ -338,8 +338,15 @@
         // --- 2. WORD CLOUD ---
         function renderWordCloud() {
             const container = document.getElementById('wordCloudContainer');
-            const ctx = document.getElementById('wordCloudChart').getContext('2d');
+            const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
+
+            // 仮想キャンバスサイズの設定 (500pxの広い空間で計算)
+            const virtualSize = 500;
+            canvas.width = virtualSize;
+            canvas.height = virtualSize;
+
+            const ctx = canvas.getContext('2d');
 
             if (wcChart) wcChart.destroy();
 
@@ -349,26 +356,17 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // コンテナ幅に基づいた動的フォントサイズ計算 (360px見切れ修正版)
-                            const w = container.offsetWidth;
-                            const isSmall = w < 400;
+                            // 仮想サイズ(500px)に基づいた安定したフォントサイズ計算
+                            const w = virtualSize;
 
-                            // 1. スコアに基づく基本サイズ
-                            const baseSize = isSmall ? (w * 0.025) : (w * 0.018);
-                            const multiplier = isSmall ? (w * 0.0008) : (w * 0.0008);
-                            const provisionalSize = baseSize + (d.score * multiplier);
+                            // 仮想空間内でのサイズ設計 [15, 60]
+                            const minSize = 15;
+                            const maxSize = 60;
+                            const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 2. 「単語の長さ」に基づく物理的な制限 (見切れを絶対に防ぐ)
-                            const safetyPadding = isSmall ? 50 : 30;
-                            const maxSafeSize = (w - safetyPadding) / d.text.length;
-
-                            // 3. 画面幅に対する絶対的な上限
-                            const maxAbsoluteSize = isSmall ? (w * 0.15) : (w * 0.07);
-
-                            // 4. 下限値の固定 (全ての文字が入り切るよう 12px を死守)
-                            const minSize = 12;
-
-                            return Math.max(minSize, Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize));
+                            // 単語の長さによる仮想領域内での制限
+                            const maxSafeSize = (virtualSize - 80) / d.text.length;
+                            return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
@@ -380,10 +378,10 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    responsive: true,
+                    responsive: false, // 仮想サイズを維持するためOFF
                     layout: {
-                        // 360px対応: 描画エリアを100%使い切り、キーワード消失を完全に防ぐ
-                        padding: 0
+                        // 仮想空間内での30pxセーフティパディング
+                        padding: 30
                     },
                     plugins: {
                         legend: { display: false },
