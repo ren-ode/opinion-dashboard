@@ -362,13 +362,11 @@
             canvas.width = width;
             canvas.height = height;
 
-            // 2. 巨大な「安全マージン」の強制 (上下に 80px、左右に 40px)
-            // 描画エンジンに対し、中央の狭いエリア以外には絶対に描画させない命令
-            const pTopBottom = isMobile ? 80 : 30;
-            const pLeftRight = isMobile ? 40 : 30;
-
-            const safeWidth = width - (pLeftRight * 2);
-            const safeHeight = height - (pTopBottom * 2);
+            // 2. 「究極の安定化」設定 (安全領域をコンテナの 60% に制限)
+            // これによりキーワードを中央に凝縮させ、端での見切れとクリック不全を物理的に排除します
+            const safeFactor = isMobile ? 0.6 : 0.8;
+            const safeWidth = width * safeFactor;
+            const safeHeight = height * safeFactor;
 
             const ctx = canvas.getContext('2d');
 
@@ -380,13 +378,13 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的なフォントサイズ [10, 24]
-                            // 最大を24まで下げることで、長い単語も安全領域に収めます
+                            // 画面幅に応じた動的なフォントサイズ [10, 20]
+                            // 360px画面で長い単語(10文字超)を収めるため、最大を 20px に抑制します
                             const minSize = isMobile ? 10 : 18;
-                            const maxSize = isMobile ? 24 : 60;
+                            const maxSize = isMobile ? 20 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 中央の狭いエリアに収まるよう制限
+                            // 中央の安全エリアに収まるよう制限
                             const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
@@ -402,13 +400,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 強力な物理パディングにより中央へ凝縮 (上下 80 / 左右 40)
-                        padding: {
-                            top: pTopBottom,
-                            bottom: pTopBottom,
-                            left: pLeftRight,
-                            right: pLeftRight
-                        }
+                        // 中央寄りに配置を固定するためのパディング
+                        padding: isMobile ? (width * (1 - safeFactor) / 2) : 30
                     },
                     plugins: {
                         legend: { display: false },
@@ -422,8 +415,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 360px対応: タップターゲットを独立させるため、スマホ時はパディングを 10px に拡大
-                            padding: isMobile ? 10 : 3,
+                            // 360px対応: 密集度を改善するためパディングを 4px に設定
+                            padding: isMobile ? 4 : 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
