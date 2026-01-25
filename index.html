@@ -75,8 +75,9 @@
             height: auto !important;
             max-height: 100% !important;
             overflow: visible !important;
+            /* 計算境界を超えても判定を捨てない */
             pointer-events: all;
-            /* クリック判定を確実に拾う */
+            /* クリック判定を確実に捕捉 */
             cursor: pointer;
         }
 
@@ -107,28 +108,27 @@
 
         /* オーバーレイ (Word Cloud内に表示) */
         #wcOverlay {
-            position: absolute;
+            position: fixed;
             inset: 0;
-            z-index: 50;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 16px;
-            display: none;
-            /* 初期非表示 */
-            flex-direction: column;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.2s ease-out;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            pointer-events: none;
+            opacity: 0;
             visibility: hidden;
-            /* 非表示時はクリックを透過し、物理的にも隠す */
+            pointer-events: none;
+            /* 非表示時は入力を透過させて背後のワードクラウドを邪魔しない */
+            transition: all 0.3s ease;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
         }
 
         #wcOverlay.active {
-            display: flex;
-            pointer-events: auto;
+            opacity: 1;
             visibility: visible;
-            /* 表示時のみクリックを有効化 */
+            pointer-events: auto;
+            /* 表示時のみ入力を受け付ける */
         }
 
         @keyframes fadeIn {
@@ -345,11 +345,11 @@
             canvas.width = virtualWidth;
             canvas.height = virtualHeight;
 
-            // 2. 「強力なデッドゾーン」の設定 (仮想空間内で 70px)
-            // 360px環境でのクリック判定消失を防ぐため、さらに内側に寄せます
-            const deadZone = isMobile ? 70 : 25;
+            // 2. 「強力なデッドゾーン」の設定 (上下左右に各 40px = 合計 80px 削減)
+            // 360px環境でのクリック判定消失を防ぐため、物理的な「壁」から指一本分（40px相当）離します
+            const deadZone = isMobile ? 40 : 25;
             const safeWidth = virtualWidth - (deadZone * 2);
-
+            const safeHeight = virtualHeight - (deadZone * 2);
             const ctx = canvas.getContext('2d');
 
             if (wcChart) wcChart.destroy();
@@ -365,7 +365,7 @@
                             const maxSize = isMobile ? 28 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 仮想空間内での制限
+                            // 仮想空間内での制限 (80px 差し引き後の安全領域)
                             const maxSafeSize = safeWidth / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
