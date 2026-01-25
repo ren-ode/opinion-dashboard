@@ -362,10 +362,14 @@
             canvas.width = width + resolutionBuffer;
             canvas.height = height + resolutionBuffer;
 
-            // 3. 配置計算用の「安全な箱」 (上下左右に 30px の絶対進入禁止エリア)
-            const safeMargin = 30;
-            const safeWidth = width - (safeMargin * 2);
-            const safeHeight = height - (safeMargin * 2);
+            // 3. 配置計算用の「安全な箱」
+            const isSmall = width < 400;
+            // スマホ時は計算領域を 80% に絞り込み、周囲に 40px 以上の絶対的な余白を作る
+            const shrinkFactor = isSmall ? 0.8 : 1.0;
+            const safeMargin = isSmall ? 10 : 30; // 進入禁止エリア
+
+            const safeWidth = (width * shrinkFactor) - (safeMargin * 2);
+            const safeHeight = (height * shrinkFactor) - (safeMargin * 2);
 
             const ctx = canvas.getContext('2d');
 
@@ -377,10 +381,10 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            const isSmallScreen = width < 400;
                             // 画面幅に応じた動的なフォントサイズレンジ
-                            const minSize = isSmallScreen ? 12 : 18;
-                            const maxSize = isSmallScreen ? 35 : 60;
+                            // スマホ時は最大サイズをさらに 20% 縮小 (最大 28px 程度)
+                            const minSize = isSmall ? 12 : 18;
+                            const maxSize = isSmall ? 28 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
                             // 「安全な箱」を超えないように制限
