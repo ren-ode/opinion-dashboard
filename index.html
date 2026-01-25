@@ -53,7 +53,8 @@
             background-color: #fbfbfb;
             border-radius: 16px;
             position: relative;
-            overflow: hidden;
+            /* 枠外のクリック判定も拾えるように visible を適用 */
+            overflow: visible !important;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -346,10 +347,13 @@
                             const safetyPadding = isSmall ? 50 : 30;
                             const maxSafeSize = (w - safetyPadding) / d.text.length;
 
-                            // 3. 画面幅に対する絶対的な上限 (スマホ時は横幅の10.8%以内[前回の20%減]に抑え、絶対に見切れないようにする)
-                            const maxAbsoluteSize = isSmall ? (w * 0.108) : (w * 0.07);
+                            // 3. 画面幅に対する絶対的な上限
+                            const maxAbsoluteSize = isSmall ? (w * 0.15) : (w * 0.07);
 
-                            return Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize);
+                            // 4. 下限値の設定 (全ての文字が入り切るよう 10px を許可)
+                            const minSize = isSmall ? 10 : 12;
+
+                            return Math.max(minSize, Math.min(provisionalSize, maxSafeSize, maxAbsoluteSize));
                         }),
                         color: (ctx) => {
                             const d = data[ctx.dataIndex];
@@ -363,8 +367,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 360px対応: 全方向に40pxの強力な安全圏(合計80px分)を確保し、端点キーワードを完全に保護
-                        padding: container.offsetWidth < 400 ? 40 : 15
+                        // エリアを広く使い、全てのキーワードが入るスペースを確保
+                        padding: container.offsetWidth < 400 ? 10 : 15
                     },
                     plugins: {
                         legend: { display: false },
