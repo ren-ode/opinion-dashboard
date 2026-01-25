@@ -59,6 +59,12 @@
             justify-content: center;
         }
 
+        #wordCloudChart {
+            /* 当たり判定を安定させるため、境界でのクリッピングを抑制 */
+            overflow: visible !important;
+            pointer-events: auto;
+        }
+
         /* トレンドチャート エリア */
         .line-chart-container {
             width: 100%;
@@ -357,8 +363,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 360px対応: 左右40px/上下30pxの絶対的な安全圏を確保
-                        padding: container.offsetWidth < 400 ? { top: 30, right: 40, bottom: 30, left: 40 } : 15
+                        // 360px対応: 全方向に40pxの強力な安全圏(合計80px分)を確保し、端点キーワードを完全に保護
+                        padding: container.offsetWidth < 400 ? 40 : 15
                     },
                     plugins: {
                         legend: { display: false },
@@ -372,7 +378,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            padding: container.offsetWidth < 600 ? 3 : 4,
+                            // 360px対応: スマホ時はパディングを 12px に増やし、タップ判定を安定させる
+                            padding: container.offsetWidth < 600 ? 12 : 4,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
