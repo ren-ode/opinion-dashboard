@@ -39,19 +39,18 @@
         /* 共通チャートコンテナ */
         .chart-section {
             width: 100%;
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto 4rem auto;
             position: relative;
             padding: 0;
-            /* 360px対応: エッジ・トゥ・エッジ描画のため余白撤廃(モバイル時) / PCでは600pxに制限 */
+            /* 360px対応: エッジ・トゥ・エッジ描画(モバイル時) / PCでは900pxに制限 */
         }
 
         /* Word Cloud エリア */
-        /* Word Cloud エリア (中央集権型: 500px正方形に固定) */
+        /* Word Cloud エリア (PC: 16:9 / スマホ: 1:1) */
         #wordCloudContainer {
             width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 16 / 9;
             margin: 0 auto;
             background-color: #fbfbfb;
             border-radius: 16px;
@@ -62,10 +61,17 @@
             justify-content: center;
         }
 
+        @media (max-width: 600px) {
+            #wordCloudContainer {
+                aspect-ratio: 1 / 1;
+                max-width: 500px;
+            }
+        }
+
         #wordCloudChart {
-            /* 仮想キャンバス方式: 広い空間(500px)で描画したものを360px枠に自動縮小 */
+            /* レスポンシブ対応: コンテナサイズに合わせて自動伸縮 */
             width: 100% !important;
-            height: auto !important;
+            height: 100% !important;
             overflow: visible !important;
             pointer-events: auto;
         }
@@ -329,10 +335,11 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 仮想キャンバスサイズの設定 (500pxの広い空間で計算)
-            const virtualSize = 500;
-            canvas.width = virtualSize;
-            canvas.height = virtualSize;
+            // 動的なサイズ取得 (PC/Mobileそれぞれのコンテナサイズに合わせる)
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
 
             const ctx = canvas.getContext('2d');
 
@@ -345,16 +352,15 @@
                     datasets: [{
 
                         data: data.map(d => {
-                            // 仮想サイズ(500px正方形)に基づいた中央集中型計算
-                            const w = virtualSize;
+                            const isSmallScreen = width < 400;
 
-                            // 仮想空間内での基本サイズ設計 [16, 50]
-                            const minSize = 16;
-                            const maxSize = 50;
+                            // 画面幅に応じた動的なフォントサイズレンジ
+                            const minSize = isSmallScreen ? 12 : 18;
+                            const maxSize = isSmallScreen ? 35 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 単語の長さによる仮想領域内での制限 (30pxのバリアを考慮して60を差し引く)
-                            const maxSafeSize = (virtualSize - 60) / d.text.length;
+                            // 見切れ防止ガード (左右20pxずつのパディングを考慮)
+                            const maxSafeSize = (width - 40) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
@@ -367,10 +373,10 @@
                 },
                 options: {
                     maintainAspectRatio: false,
-                    responsive: false, // 仮想サイズを維持するためOFF
+                    responsive: true,
                     layout: {
-                        // 仮想空間内での30pxセーフティバリア (見切れを物理的に防ぐ)
-                        padding: 30
+                        // 端から 20px の絶対進入禁止エリアを確保
+                        padding: 20
                     },
                     plugins: {
                         legend: { display: false },
@@ -470,13 +476,10 @@
                                 anchor: 'center',
                                 align: 'center',
                                 // デザイン統一のため一律で黒系に固定
-                                color: '#333333',
-                                font: {
-                                    weight: 'bold',
-                                    size: isSmallScreen ? 9 : 11 // スマホ時は 9px に設定
-                                },
-                                formatter: (value, context) => {
-                                    return context.chart.data.labels[context.dataIndex];
+                                color: '#333333', // 360px対応: 背景色に寄らず黒で固定
+                                font: { weight: '900', size: 12 },
+                                formatter: (val, ctx) => {
+                                    return ctx.chart.data.labels[ctx.dataIndex];
                                 }
                             }
                         },
