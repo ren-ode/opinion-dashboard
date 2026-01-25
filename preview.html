@@ -282,15 +282,15 @@
                         </svg>
                     </button>
                     <!-- Center Details (クリック伝播を停止) -->
-                    <div class="relative w-[95%] h-[95%] sm:w-[90%] sm:h-[90%] max-w-[420px] max-h-[420px] flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-3xl p-4 shadow-2xl"
-                        onclick="event.stopPropagation()">
-                        <!-- タイトルを上部に配置 -->
-                        <div class="mb-4 text-center">
+                    <div class="overlay-content py-8 px-4" onclick="event.stopPropagation()">
+                        <!-- タイトル -->
+                        <div class="mb-6">
                             <span id="overlayCenterText"
                                 class="text-lg sm:text-xl font-bold text-gray-800 border-b-2 border-teal-500 pb-1"></span>
                         </div>
-                        <div class="relative w-full flex-grow">
-                            <canvas id="drilldownChart" class="relative z-10"></canvas>
+                        <!-- 正方形固定ラッパー -->
+                        <div class="chart-wrapper">
+                            <canvas id="drilldownChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -505,14 +505,24 @@
                         }]
                     },
                     options: {
-                        maintainAspectRatio: false,
+                        responsive: true,
+                        maintainAspectRatio: true, // 比率を維持
+                        aspectRatio: 1,           // 1:1 (正方形) に固定
                         layout: {
-                            padding: isSmallScreen ? 40 : 25 // スマホ時は40pxパディングでグラフをよりコンパクトに
+                            padding: isSmallScreen ? 20 : 25 // スマホ時は40pxパディングでグラフをよりコンパクトに
                         },
                         // 文字が収まる範囲で穴を調整(60%)
                         cutout: '60%',
                         plugins: {
-                            legend: { display: false },
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: { size: 11, weight: 'bold' },
+                                    color: '#1f2937'
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     title: () => null,
