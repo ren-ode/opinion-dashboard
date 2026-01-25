@@ -39,15 +39,15 @@
         /* 共通チャートコンテナ */
         .chart-section {
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto 4rem auto;
             position: relative;
             padding: 0;
-            /* 360px対応: エッジ・トゥ・エッジ描画(モバイル時) / PCでは900pxに制限 */
+            /* 360px対応: エッジ・トゥ・エッジ描画(モバイル時) / PCでは800pxに制限 */
         }
 
         /* Word Cloud エリア */
-        /* Word Cloud エリア (PC: 16:9 / スマホ: 1:1) */
+        /* Word Cloud エリア (PC: 16:9 / スマホ: 1:1.1) */
         #wordCloudContainer {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -63,7 +63,8 @@
 
         @media (max-width: 600px) {
             #wordCloudContainer {
-                aspect-ratio: 1 / 1;
+                aspect-ratio: 1 / 1.1;
+                /* 縦に余裕を持たせて見切れを防止 */
                 max-width: 500px;
             }
         }
@@ -335,9 +336,14 @@
             const canvas = document.getElementById('wordCloudChart');
             const data = appData.wordCloud || [];
 
-            // 動的なサイズ取得 (PC/Mobileそれぞれのコンテナサイズに合わせる)
+            // 仮想描画解像度の設定 (物理的なカットを防ぐため、実際のサイズより少し大きめに計算領域を確保)
             const width = container.clientWidth;
             const height = container.clientHeight;
+
+            // スマホ時は 50px の「絶対禁止区域」を設ける
+            const isSmall = width < 400;
+            const padding = isSmall ? 50 : 20;
+
             canvas.width = width;
             canvas.height = height;
 
@@ -352,15 +358,13 @@
                     datasets: [{
 
                         data: data.map(d => {
-                            const isSmallScreen = width < 400;
-
                             // 画面幅に応じた動的なフォントサイズレンジ
-                            const minSize = isSmallScreen ? 12 : 18;
-                            const maxSize = isSmallScreen ? 35 : 60;
+                            const minSize = isSmall ? 12 : 18;
+                            const maxSize = isSmall ? 35 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 見切れ防止ガード (左右20pxずつのパディングを考慮)
-                            const maxSafeSize = (width - 40) / d.text.length;
+                            // 見切れ防止ガード (設定されたパディングの2倍分を差し引く)
+                            const maxSafeSize = (width - (padding * 2)) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
@@ -375,8 +379,8 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 端から 20px の絶対進入禁止エリアを確保
-                        padding: 20
+                        // 文字が境界に触れないよう、強力なパディングを設定
+                        padding: padding
                     },
                     plugins: {
                         legend: { display: false },
