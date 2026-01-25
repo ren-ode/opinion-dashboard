@@ -64,7 +64,8 @@
 
         @media (max-width: 600px) {
             #wordCloudContainer {
-                aspect-ratio: 1 / 1.1;
+                aspect-ratio: 1 / 1;
+                /* 正方形に復元 */
                 width: 100%;
             }
         }
@@ -345,11 +346,13 @@
             canvas.width = virtualWidth;
             canvas.height = virtualHeight;
 
-            // 2. 「強力なデッドゾーン」の設定 (上下左右に各 40px = 合計 80px 削減)
-            // 360px環境でのクリック判定消失を防ぐため、物理的な「壁」から指一本分（40px相当）離します
-            const deadZone = isMobile ? 40 : 25;
-            const safeWidth = virtualWidth - (deadZone * 2);
-            const safeHeight = virtualHeight - (deadZone * 2);
+            // 2. 「センター・フォーカス」設定 (上下合計120px、左右合計40pxの強力な余白)
+            // これによりキーワードを中央にギュッと凝縮させます
+            const deadZoneX = isMobile ? 20 : 15; // 片側分のマージン
+            const deadZoneY = isMobile ? 60 : 15;
+            const safeWidth = virtualWidth - (deadZoneX * 2);
+            const safeHeight = virtualHeight - (deadZoneY * 2);
+
             const ctx = canvas.getContext('2d');
 
             if (wcChart) wcChart.destroy();
@@ -360,13 +363,13 @@
                     labels: data.map(d => d.text),
                     datasets: [{
                         data: data.map(d => {
-                            // 画面幅に応じた動的なフォントサイズ
+                            // 画面幅に応じた動的なフォントサイズ Range [12, 30]
                             const minSize = isMobile ? 12 : 18;
-                            const maxSize = isMobile ? 28 : 60;
+                            const maxSize = isMobile ? 30 : 60;
                             const size = minSize + (maxSize - minSize) * (d.score / 100);
 
-                            // 仮想空間内での制限 (80px 差し引き後の安全領域)
-                            const maxSafeSize = safeWidth / d.text.length;
+                            // 仮想空間内での制限 (中央エリアに収まるサイズ)
+                            const maxSafeSize = Math.min(safeWidth, safeHeight) / d.text.length;
                             return Math.min(size, maxSafeSize);
                         }),
                         color: (ctx) => {
@@ -381,8 +384,13 @@
                     maintainAspectRatio: false,
                     responsive: true,
                     layout: {
-                        // 仮想空間内での強力なデッドゾーンを確保
-                        padding: deadZone
+                        // 中央寄りに配置を固定するためのパディング設定 (合計 40px / 120px)
+                        padding: {
+                            left: deadZoneX,
+                            right: deadZoneX,
+                            top: deadZoneY,
+                            bottom: deadZoneY
+                        }
                     },
                     plugins: {
                         legend: { display: false },
