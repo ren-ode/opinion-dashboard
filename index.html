@@ -381,6 +381,22 @@
                 options: {
                     maintainAspectRatio: false,
                     responsive: false, // 勝手な再描画を停止し、CSS スケーリングに任せる
+                    onClick: (e) => {
+                        const chart = e.chart;
+                        // getElementsAtEventForMode は内部解像度への座標マッピングを自動で行う
+                        const points = chart.getElementsAtEventForMode(e.native, 'nearest', { intersect: true }, true);
+                        if (points.length > 0) {
+                            const idx = points[0].index;
+                            const text = chart.data.labels[idx];
+                            openOverlay(text);
+                        }
+                    },
+                    onHover: (e, elements) => {
+                        const chart = e.chart;
+                        // ホバー判定も同様に内部座標マッピングを使用してポインターを切り替える
+                        const points = chart.getElementsAtEventForMode(e.native, 'nearest', { intersect: true }, true);
+                        e.native.target.style.cursor = points.length > 0 ? 'pointer' : 'default';
+                    },
                     layout: {
                         padding: 30 // 800px 時の適正バッファ
                     },
