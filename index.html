@@ -76,6 +76,7 @@
             max-height: 100% !important;
             overflow: visible !important;
             pointer-events: all;
+            /* クリック判定を確実に拾う */
             cursor: pointer;
         }
 
@@ -344,8 +345,9 @@
             canvas.width = virtualWidth;
             canvas.height = virtualHeight;
 
-            // 2. 「強力なデッドゾーン」の設定 (仮想空間内で 50px)
-            const deadZone = isMobile ? 50 : 25;
+            // 2. 「強力なデッドゾーン」の設定 (仮想空間内で 70px)
+            // 360px環境でのクリック判定消失を防ぐため、さらに内側に寄せます
+            const deadZone = isMobile ? 70 : 25;
             const safeWidth = virtualWidth - (deadZone * 2);
 
             const ctx = canvas.getContext('2d');
@@ -394,8 +396,8 @@
                             maxRotation: 0,
                             rotate: 0,
 
-                            // 360px対応: 文字を中央に密集させるためパディングを 3px に縮小
-                            padding: 3,
+                            // 360px対応: タップ判定を安定させるため、スマホ時はパディングを 8px に拡大
+                            padding: isMobile ? 8 : 3,
                             fontFamily: 'Noto Sans JP',
                             fontWeight: '900',
 
