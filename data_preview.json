@@ -1,13 +1,13 @@
 {
   "meta": {
-    "lastUpdated": "2026-01-27T12:40:24.760Z",
+    "lastUpdated": "2026-01-27T12:45:25.169Z",
     "targetDateLabel": "1月26日分",
     "rangeLabel": "1月21日〜1月26日"
   },
   "wordCloud": [
     {
       "text": "外交・安保問題",
-      "score": 99
+      "score": 75
     },
     {
       "text": "外国人問題",
@@ -15,7 +15,7 @@
     },
     {
       "text": "教育・子育て支援",
-      "score": 47
+      "score": 36
     }
   ],
   "pie": {
@@ -68,43 +68,43 @@
     "外国人問題": [
       {
         "label": "日本人ファースト",
-        "percent": 13.6
+        "percent": 10.2
       },
       {
         "label": "オーバーツーリズム",
-        "percent": 1.2
+        "percent": 1.9
       },
       {
         "label": "外国人参政権",
-        "percent": 1.2
+        "percent": 1.9
       },
       {
         "label": "移民問題",
-        "percent": 30.9
+        "percent": 46.3
       },
       {
         "label": "排外主義",
-        "percent": 3.7
+        "percent": 2.8
       },
       {
         "label": "クルド人",
-        "percent": 12.3
+        "percent": 9.3
       },
       {
         "label": "不法滞在",
-        "percent": 9.9
+        "percent": 7.4
       },
       {
         "label": "強制送還",
-        "percent": 19.8
+        "percent": 14.8
       },
       {
         "label": "土葬",
-        "percent": 2.5
+        "percent": 1.9
       },
       {
         "label": "土地取得",
-        "percent": 4.9
+        "percent": 3.7
       }
     ],
     "教育・子育て支援": [
@@ -190,7 +190,7 @@
     {
       "date": "2026-01-26",
       "外交・安保問題": 0.19,
-      "外国人問題": 0.192,
+      "外国人問題": 0.257,
       "教育・子育て支援": 0.09,
       "景気・物価高対策": 0,
       "原発・エネルギー政策": 0,
