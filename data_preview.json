@@ -1,17 +1,21 @@
 {
   "meta": {
-    "lastUpdated": "2026-01-27T12:37:04.702Z",
+    "lastUpdated": "2026-01-27T12:40:24.760Z",
     "targetDateLabel": "1月26日分",
     "rangeLabel": "1月21日〜1月26日"
   },
   "wordCloud": [
     {
       "text": "外交・安保問題",
-      "score": 100
+      "score": 99
     },
     {
       "text": "外国人問題",
-      "score": 0
+      "score": 100
+    },
+    {
+      "text": "教育・子育て支援",
+      "score": 47
     }
   ],
   "pie": {
@@ -64,43 +68,73 @@
     "外国人問題": [
       {
         "label": "日本人ファースト",
-        "percent": null
+        "percent": 13.6
       },
       {
         "label": "オーバーツーリズム",
-        "percent": null
+        "percent": 1.2
       },
       {
         "label": "外国人参政権",
-        "percent": null
+        "percent": 1.2
       },
       {
         "label": "移民問題",
-        "percent": null
+        "percent": 30.9
       },
       {
         "label": "排外主義",
-        "percent": null
+        "percent": 3.7
       },
       {
         "label": "クルド人",
-        "percent": null
+        "percent": 12.3
       },
       {
         "label": "不法滞在",
-        "percent": null
+        "percent": 9.9
       },
       {
         "label": "強制送還",
-        "percent": null
+        "percent": 19.8
       },
       {
         "label": "土葬",
-        "percent": null
+        "percent": 2.5
       },
       {
         "label": "土地取得",
-        "percent": null
+        "percent": 4.9
+      }
+    ],
+    "教育・子育て支援": [
+      {
+        "label": "教育格差",
+        "percent": 7.9
+      },
+      {
+        "label": "子ども・子育て支援金",
+        "percent": 13.2
+      },
+      {
+        "label": "教員不足",
+        "percent": 2.6
+      },
+      {
+        "label": "少子化",
+        "percent": 65.8
+      },
+      {
+        "label": "教育無償化",
+        "percent": 10.5
+      },
+      {
+        "label": "出産無償化",
+        "percent": 0
+      },
+      {
+        "label": "年少扶養控除",
+        "percent": 0
       }
     ]
   },
@@ -156,8 +190,8 @@
     {
       "date": "2026-01-26",
       "外交・安保問題": 0.19,
-      "外国人問題": 0,
-      "教育・子育て支援": 0,
+      "外国人問題": 0.192,
+      "教育・子育て支援": 0.09,
       "景気・物価高対策": 0,
       "原発・エネルギー政策": 0,
       "ジェンダー・多様性": 0,
