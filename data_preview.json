@@ -1,13 +1,13 @@
 {
   "meta": {
-    "lastUpdated": "2026-01-27T12:31:17.350Z",
+    "lastUpdated": "2026-01-27T12:37:04.702Z",
     "targetDateLabel": "1月26日分",
     "rangeLabel": "1月21日〜1月26日"
   },
   "wordCloud": [
     {
       "text": "外交・安保問題",
-      "score": 0
+      "score": 100
     },
     {
       "text": "外国人問題",
@@ -18,47 +18,47 @@
     "外交・安保問題": [
       {
         "label": "日中関係",
-        "percent": null
+        "percent": 16.3
       },
       {
         "label": "防衛力",
-        "percent": null
+        "percent": 7.5
       },
       {
         "label": "憲法改正",
-        "percent": null
+        "percent": 20
       },
       {
         "label": "日米関係",
-        "percent": null
+        "percent": 25
       },
       {
         "label": "台湾有事",
-        "percent": null
+        "percent": 31.3
       },
       {
         "label": "防衛費",
-        "percent": null
+        "percent": 0
       },
       {
         "label": "安保三文書",
-        "percent": null
+        "percent": 0
       },
       {
         "label": "非核三原則",
-        "percent": null
+        "percent": 0
       },
       {
         "label": "拉致",
-        "percent": null
+        "percent": 0
       },
       {
         "label": "スパイ防止法",
-        "percent": null
+        "percent": 0
       },
       {
         "label": "集団的自衛権",
-        "percent": null
+        "percent": 0
       }
     ],
     "外国人問題": [
@@ -155,7 +155,7 @@
     },
     {
       "date": "2026-01-26",
-      "外交・安保問題": 0,
+      "外交・安保問題": 0.19,
       "外国人問題": 0,
       "教育・子育て支援": 0,
       "景気・物価高対策": 0,
