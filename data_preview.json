@@ -1,21 +1,21 @@
 {
   "meta": {
-    "lastUpdated": "2026-01-28T12:24:29.949Z",
+    "lastUpdated": "2026-01-28T12:47:42.106Z",
     "targetDateLabel": "1月27日分",
     "rangeLabel": "1月27日〜1月27日"
   },
   "wordCloud": [
     {
       "text": "外交・安保政策",
-      "score": 33
+      "score": 39
     },
     {
       "text": "外国人政策",
-      "score": 21
+      "score": 24
     },
     {
       "text": "教育・子育て支援",
-      "score": 11
+      "score": 14
     },
     {
       "text": "景気・物価高対策",
@@ -23,34 +23,34 @@
     },
     {
       "text": "原発・エネルギー政策",
-      "score": 15
+      "score": 17
     },
     {
       "text": "ジェンダー・多様性",
-      "score": 25
+      "score": 50
     },
     {
       "text": "政治と金",
-      "score": 15
+      "score": 21
     },
     {
       "text": "年金・社会保障",
-      "score": 77
+      "score": 71
     },
     {
       "text": "衆院選の是非",
-      "score": 7
+      "score": 8
     }
   ],
   "pie": {
     "外交・安保政策": [
       {
         "label": "防衛力",
-        "percent": 30.6
+        "percent": 36.6
       },
       {
         "label": "憲法改正",
-        "percent": 7.4
+        "percent": 7.1
       },
       {
         "label": "日米関係",
@@ -58,11 +58,11 @@
       },
       {
         "label": "台湾有事",
-        "percent": 29.4
+        "percent": 23.8
       },
       {
         "label": "防衛費",
-        "percent": 5.9
+        "percent": 5.7
       },
       {
         "label": "安保三文書",
@@ -74,25 +74,25 @@
       },
       {
         "label": "拉致問題",
-        "percent": 5.3
+        "percent": 5.2
       },
       {
         "label": "スパイ防止法",
-        "percent": 5.3
+        "percent": 5.2
       },
       {
         "label": "集団的自衛権",
-        "percent": 3.6
+        "percent": 3.4
       },
       {
         "label": "日中関係",
-        "percent": 2.1
+        "percent": 2.7
       }
     ],
     "外国人政策": [
       {
         "label": "日本人ファースト",
-        "percent": 7.6
+        "percent": 7.5
       },
       {
         "label": "オーバーツーリズム",
@@ -104,7 +104,7 @@
       },
       {
         "label": "移民受け入れ",
-        "percent": 8.5
+        "percent": 8.4
       },
       {
         "label": "排外主義",
@@ -112,11 +112,11 @@
       },
       {
         "label": "不法滞在",
-        "percent": 13.3
+        "percent": 13.4
       },
       {
         "label": "強制送還",
-        "percent": 24.6
+        "percent": 25.2
       },
       {
         "label": "土葬問題",
@@ -128,21 +128,21 @@
       },
       {
         "label": "外国人生活保護",
-        "percent": 14.2
+        "percent": 14
       },
       {
         "label": "外国人問題",
-        "percent": 24.2
+        "percent": 24
       }
     ],
     "教育・子育て支援": [
       {
         "label": "教育格差",
-        "percent": 3.7
+        "percent": 3.3
       },
       {
         "label": "子ども・子育て支援金",
-        "percent": 7.4
+        "percent": 6.6
       },
       {
         "label": "教員不足",
@@ -150,11 +150,11 @@
       },
       {
         "label": "少子化",
-        "percent": 37
+        "percent": 33.1
       },
       {
         "label": "教育無償化",
-        "percent": 1.9
+        "percent": 1.7
       },
       {
         "label": "出産無償化",
@@ -162,53 +162,53 @@
       },
       {
         "label": "年少扶養控除",
-        "percent": 3.7
+        "percent": 3.3
       },
       {
         "label": "奨学金",
-        "percent": 46.3
+        "percent": 51.9
       }
     ],
     "景気・物価高対策": [
       {
         "label": "消費税",
-        "percent": 40.3
+        "percent": 33
       },
       {
         "label": "年収の壁",
-        "percent": 3.2
+        "percent": 3.6
       },
       {
         "label": "物価高",
-        "percent": 12.3
+        "percent": 11.4
       },
       {
         "label": "賃上げ",
-        "percent": 4.5
+        "percent": 5.3
       },
       {
         "label": "就職氷河期世代",
-        "percent": 1.1
+        "percent": 1.3
       },
       {
         "label": "非正規雇用",
-        "percent": 0.8
+        "percent": 0.9
       },
       {
         "label": "減税",
-        "percent": 14.4
+        "percent": 16.7
       },
       {
         "label": "増税",
-        "percent": 5.4
+        "percent": 6
       },
       {
         "label": "給付付き税額控除",
-        "percent": 1.5
+        "percent": 1.8
       },
       {
         "label": "円安",
-        "percent": 16.5
+        "percent": 20.1
       }
     ],
     "原発・エネルギー政策": [
@@ -222,7 +222,7 @@
       },
       {
         "label": "メガソーラー",
-        "percent": 8.6
+        "percent": 8.4
       },
       {
         "label": "温暖化対策",
@@ -234,39 +234,39 @@
       },
       {
         "label": "再生可能エネルギー",
-        "percent": 53
+        "percent": 53.1
       }
     ],
     "ジェンダー・多様性": [
       {
         "label": "夫婦別姓",
-        "percent": 6.2
+        "percent": 3.6
       },
       {
         "label": "同性婚",
-        "percent": 3.1
+        "percent": 1.8
       },
       {
         "label": "ジェンダー平等",
-        "percent": 4.6
+        "percent": 2.7
       },
       {
         "label": "LGBTQ",
-        "percent": 76.9
+        "percent": 86.4
       },
       {
         "label": "多文化共生",
-        "percent": 9.2
+        "percent": 5.4
       }
     ],
     "政治と金": [
       {
         "label": "裏金問題",
-        "percent": 27
+        "percent": 21.3
       },
       {
         "label": "旧統一教会",
-        "percent": 67.6
+        "percent": 74.5
       },
       {
         "label": "企業・団体献金",
@@ -278,7 +278,7 @@
       },
       {
         "label": "議員定数削減",
-        "percent": 5.4
+        "percent": 4.3
       },
       {
         "label": "パーティ券",
@@ -292,23 +292,23 @@
       },
       {
         "label": "健康保険",
-        "percent": 7.2
+        "percent": 8.6
       },
       {
         "label": "年金",
-        "percent": 69.5
+        "percent": 60.2
       },
       {
         "label": "OTC類似薬",
-        "percent": 0.5
+        "percent": 0.6
       },
       {
         "label": "生活保護",
-        "percent": 11.6
+        "percent": 16.6
       },
       {
         "label": "介護保険",
-        "percent": 3.8
+        "percent": 4.7
       },
       {
         "label": "ベーシックサービス",
@@ -316,36 +316,36 @@
       },
       {
         "label": "医療費",
-        "percent": 7.3
+        "percent": 9.2
       }
     ],
     "衆院選の是非": [
       {
         "label": "ダブル選挙",
-        "percent": 50.8
+        "percent": 51
       },
       {
         "label": "解散の大義",
-        "percent": 31.7
+        "percent": 30.6
       },
       {
         "label": "冬の選挙",
-        "percent": 17.5
+        "percent": 18.4
       }
     ]
   },
   "trends": [
     {
       "date": "2026-01-27",
-      "外交・安保政策": 0.324,
-      "外国人政策": 0.203,
-      "教育・子育て支援": 0.104,
+      "外交・安保政策": 0.388,
+      "外国人政策": 0.238,
+      "教育・子育て支援": 0.134,
       "景気・物価高対策": 1,
-      "原発・エネルギー政策": 0.145,
-      "ジェンダー・多様性": 0.25,
-      "政治と金": 0.142,
-      "年金・社会保障": 0.761,
-      "衆院選の是非": 0.061
+      "原発・エネルギー政策": 0.168,
+      "ジェンダー・多様性": 0.493,
+      "政治と金": 0.21,
+      "年金・社会保障": 0.71,
+      "衆院選の是非": 0.073
     }
   ]
 }
