@@ -1,140 +1,60 @@
 {
   "meta": {
-    "lastUpdated": "2026-01-27T12:45:25.169Z",
-    "targetDateLabel": "1月26日分",
-    "rangeLabel": "1月21日〜1月26日"
+    "lastUpdated": "2026-01-28T01:57:03.377Z",
+    "targetDateLabel": "1月27日分",
+    "rangeLabel": "1月21日〜1月27日"
   },
   "wordCloud": [
     {
       "text": "外交・安保問題",
-      "score": 75
-    },
-    {
-      "text": "外国人問題",
       "score": 100
-    },
-    {
-      "text": "教育・子育て支援",
-      "score": 36
     }
   ],
   "pie": {
     "外交・安保問題": [
       {
         "label": "日中関係",
-        "percent": 16.3
+        "percent": 6.1
       },
       {
         "label": "防衛力",
-        "percent": 7.5
+        "percent": 5.3
       },
       {
         "label": "憲法改正",
-        "percent": 20
+        "percent": 6.1
       },
       {
         "label": "日米関係",
-        "percent": 25
+        "percent": 4.5
       },
       {
         "label": "台湾有事",
-        "percent": 31.3
+        "percent": 38.6
       },
       {
         "label": "防衛費",
-        "percent": 0
+        "percent": 5.3
       },
       {
         "label": "安保三文書",
-        "percent": 0
+        "percent": 1.5
       },
       {
         "label": "非核三原則",
-        "percent": 0
+        "percent": 5.3
       },
       {
         "label": "拉致",
-        "percent": 0
+        "percent": 17.4
       },
       {
         "label": "スパイ防止法",
-        "percent": 0
+        "percent": 7.6
       },
       {
         "label": "集団的自衛権",
-        "percent": 0
-      }
-    ],
-    "外国人問題": [
-      {
-        "label": "日本人ファースト",
-        "percent": 10.2
-      },
-      {
-        "label": "オーバーツーリズム",
-        "percent": 1.9
-      },
-      {
-        "label": "外国人参政権",
-        "percent": 1.9
-      },
-      {
-        "label": "移民問題",
-        "percent": 46.3
-      },
-      {
-        "label": "排外主義",
-        "percent": 2.8
-      },
-      {
-        "label": "クルド人",
-        "percent": 9.3
-      },
-      {
-        "label": "不法滞在",
-        "percent": 7.4
-      },
-      {
-        "label": "強制送還",
-        "percent": 14.8
-      },
-      {
-        "label": "土葬",
-        "percent": 1.9
-      },
-      {
-        "label": "土地取得",
-        "percent": 3.7
-      }
-    ],
-    "教育・子育て支援": [
-      {
-        "label": "教育格差",
-        "percent": 7.9
-      },
-      {
-        "label": "子ども・子育て支援金",
-        "percent": 13.2
-      },
-      {
-        "label": "教員不足",
-        "percent": 2.6
-      },
-      {
-        "label": "少子化",
-        "percent": 65.8
-      },
-      {
-        "label": "教育無償化",
-        "percent": 10.5
-      },
-      {
-        "label": "出産無償化",
-        "percent": 0
-      },
-      {
-        "label": "年少扶養控除",
-        "percent": 0
+        "percent": 2.3
       }
     ]
   },
@@ -192,6 +112,18 @@
       "外交・安保問題": 0.19,
       "外国人問題": 0.257,
       "教育・子育て支援": 0.09,
+      "景気・物価高対策": 0,
+      "原発・エネルギー政策": 0,
+      "ジェンダー・多様性": 0,
+      "政治とカネ": 0,
+      "年金・社会保障": 0,
+      "衆院選の是非": 0
+    },
+    {
+      "date": "2026-01-27",
+      "外交・安保問題": 0.314,
+      "外国人問題": 0,
+      "教育・子育て支援": 0,
       "景気・物価高対策": 0,
       "原発・エネルギー政策": 0,
       "ジェンダー・多様性": 0,
